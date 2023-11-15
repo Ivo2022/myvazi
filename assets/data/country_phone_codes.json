@@ -1,0 +1,37 @@
+[
+  {
+    "countryName": "United States",
+    "countryCode": "US",
+    "phoneCode": "+1"
+  },
+  {
+    "countryName": "Canada",
+    "countryCode": "CA",
+    "phoneCode": "+1"
+  },
+  {
+    "countryName": "Uganda",
+    "countryCode": "UG",
+    "phoneCode": "+256"
+  },
+  {
+    "countryName": "Kenya",
+    "countryCode": "KE",
+    "phoneCode": "+254"
+  },
+  {
+    "countryName": "Tanzania",
+    "countryCode": "TZ",
+    "phoneCode": "+255"
+  },
+  {
+    "countryName": "United States",
+    "countryCode": "US",
+    "phoneCode": "+1"
+  },
+  {
+    "countryName": "Canada",
+    "countryCode": "CA",
+    "phoneCode": "+1"
+  }
+]
