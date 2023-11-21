@@ -259,6 +259,7 @@ class _RevenueState extends State<Revenue> {
     final userProvider = Provider.of<UserDataProvider>(context);
     userProvider.fetchUsersData();
     String? phoneNo = userProvider.users?.userPhone ?? "No phone Number";
+    var height = MediaQuery.sizeOf(context).height;
 
     return SingleChildScrollView(
       child: Column(
@@ -268,7 +269,7 @@ class _RevenueState extends State<Revenue> {
               style: TextStyle(fontWeight: FontWeight.bold)),
           const Divider(),
           SizedBox(
-            height: MediaQuery.sizeOf(context).height * .05,
+            height: height * .05,
             child: currentMonthOrders.isEmpty
                 ? const Center(
                     child: Text(
@@ -284,9 +285,7 @@ class _RevenueState extends State<Revenue> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Padding(
-                              padding: EdgeInsets.only(
-                                  right:
-                                      MediaQuery.sizeOf(context).height * .17),
+                              padding: EdgeInsets.only(right: height * .17),
                               child: Text(
                                 currentMonthOrders.values.first,
                                 style: const TextStyle(
@@ -406,7 +405,7 @@ class _RevenueState extends State<Revenue> {
           SizedBox(
             height: math.max(
               // Minimum height when there is no data
-              MediaQuery.sizeOf(context).height * 0.05,
+              height * 0.05,
               // Calculate the height based on the number of items in the list
               yearlyOrders.isNotEmpty ? yearlyOrders.length * itemHeight : 0.0,
             ),
@@ -435,7 +434,7 @@ class _RevenueState extends State<Revenue> {
                   ),
           ),
           SizedBox(
-            height: MediaQuery.sizeOf(context).height * .05,
+            height: height * .05,
             child: totalRevenue.isEmpty
                 ? const Center(
                     child: Text(

@@ -9,6 +9,7 @@ import 'package:myvazi/src/screens/chat.dart';
 import 'package:myvazi/src/screens/sale.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:myvazi/src/screens/testing.dart';
 import 'package:provider/provider.dart';
 
 class Routing extends StatefulWidget {
@@ -78,7 +79,7 @@ class _RoutingState extends State<Routing> {
       case 1:
         return const Screen1();
       case 2:
-        return const Sale();
+        return const Testing();
       case 3:
         return const Chat();
       case 4:

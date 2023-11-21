@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:myvazi/src/models/cart_data.dart';
 import 'package:myvazi/src/utils/drawer_actions.dart';
 import 'package:myvazi/src/models/data.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:myvazi/src/widgets/my_cart.dart';
+import 'package:myvazi/src/configs/constants.dart';
 import 'package:myvazi/src/widgets/product_view.dart';
+import 'package:myvazi/src/controllers/controllers.dart';
 
 class FrontPage extends StatefulWidget {
   const FrontPage({super.key});
@@ -15,81 +18,63 @@ class FrontPage extends StatefulWidget {
 
 class _FrontPageState extends State<FrontPage> {
   final ShoppingCart cart = ShoppingCart();
+  List? ourHomeList;
+  Map? home;
+  Map? subcats;
 
-  final List<Item> data = [
-    Item(
-        title: 'Shoes',
-        desc: 'Lorem ipsum dolor sit amet...',
-        amount: 50000,
-        image: 'assets/images/image1.jpg',
-        seller: 'Seller One',
-        rating: 4,
-        tag: 'image1'),
-    Item(
-        title: 'Bags',
-        desc: 'Lorem ipsum dolor sit amet...',
-        amount: 20000,
-        image: 'assets/images/image2.jpg',
-        seller: 'Seller Two',
-        rating: 5,
-        tag: 'image2'),
-    Item(
-        title: 'Shirts',
-        desc: 'Lorem ipsum dolor sit amet...',
-        amount: 40000,
-        image: 'assets/images/image3.jpg',
-        seller: 'Seller Three',
-        rating: 2,
-        tag: 'image3'),
-    Item(
-        title: 'Wallets',
-        desc: 'Lorem ipsum dolor sit amet...',
-        amount: 15000,
-        image: 'assets/images/image4.jpg',
-        seller: 'Seller Four',
-        rating: 1,
-        tag: 'image4'),
-    Item(
-        title: 'Shorts',
-        desc: 'Lorem ipsum dolor sit amet...',
-        amount: 17000,
-        image: 'assets/images/image5.jpg',
-        seller: 'Seller Five',
-        rating: 4,
-        tag: 'image5'),
-    Item(
-        title: 'Bags',
-        desc: 'Lorem ipsum dolor sit amet...',
-        amount: 20000,
-        image: 'assets/images/image2.jpg',
-        seller: 'Seller Six',
-        rating: 5,
-        tag: 'image6'),
-    Item(
-        title: 'Wallets',
-        desc: 'Lorem ipsum dolor sit amet...',
-        amount: 15000,
-        image: 'assets/images/image4.jpg',
-        seller: 'Seller Seven',
-        rating: 2,
-        tag: 'image7'),
-    Item(
-        title: 'Shirts',
-        desc: 'Lorem ipsum dolor sit amet...',
-        amount: 40000,
-        image: 'assets/images/image3.jpg',
-        seller: 'Seller Eight',
-        rating: 3,
-        tag: 'image8'),
-  ];
-  final List<Tab> tabs = [
-    const Tab(text: 'ALL'),
-    const Tab(text: 'MEN'),
-    const Tab(text: 'WOMEN'),
-    const Tab(text: 'FURNISHINGS'),
-    const Tab(text: 'KIDS'),
-    // Add more tabs as needed
-  ];
+  int positionedTab = 0;
+  int positionedTabb = 0;
+  int? hoverPosition;
+  int? hoverPositioned;
+  List subCatsShown = [];
+  List productsShown = [];
+  List? subCatProducts = [];
+
+  List? subcatList = [];
+
+  void homeData(int categoryInt, int subcategoryInt) {
+    setState(() {
+      home = ourHomeList!.elementAt(categoryInt);
+      subcatList = home!.values.last;
+      subcats = subcatList!.elementAt(subcategoryInt);
+      subCatProducts = subcats!.values.elementAt(2);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    homeList.addListener(() {
+      if (homeList.value.isNotEmpty) {
+        setState(() {
+          ourHomeList = homeList.value;
+          homeData(0, 0);
+        });
+        //print(subCatProducts);
+
+        if (ourHomeList != null) {
+          List singleCatList = home!.values.last;
+          for (var i = 0; i < singleCatList.length; i++) {
+            for (var j = 0; j < ourHomeList!.length; j++) {
+              home = ourHomeList!.elementAt(j);
+              String tabName = home!.values.elementAt(0);
+              // Filter the data for the target main category
+              List<dynamic> targetMainCatData = ourHomeList!
+                  .where((element) => element['maincat_name'] == tabName)
+                  .toList();
+
+              // Extract subcategories for the target main category
+              List<dynamic> subcategories = targetMainCatData.isNotEmpty
+                  ? targetMainCatData.first['subcategory_details']
+                  : [];
+            }
+          }
+        }
+      }
+    });
+    fetchMaincategories();
+  }
+
   void _showImage(BuildContext context) {
     showDialog(
       context: context,
@@ -125,179 +110,245 @@ class _FrontPageState extends State<FrontPage> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 5,
-      child: Scaffold(
-        appBar: AppBar(
-          actions: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                MediaQuery.of(context).size.width *
-                    0.1, // Left padding (0% of screen width)
-                MediaQuery.of(context).size.height *
-                    0.0, // Top padding (0% of screen height)
-                MediaQuery.of(context).size.width *
-                    0.15, // Right padding (50% of screen width)
-                MediaQuery.of(context).size.height *
-                    0.0, // Bottom padding (10% of screen height)
-              ),
-              child: IconButton(
-                icon: Image.asset(
-                    'assets/icons/myvazi_app_logo.png'), // Add your desired icon here
-                onPressed: () {
-                  // Implement the desired action when the icon is pressed
-                  print('Icon pressed!');
-                },
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.search), // Add your desired icon here
-              onPressed: () {
-                // Implement the desired action when the icon is pressed
-                print('Icon pressed!');
-              },
-            ),
-            IconButton(
-              icon: const Icon(
-                  Icons.shopping_basket_outlined), // Add your desired icon here
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => CartScreen(
-                            cart: cart,
-                            removeFromCart: removeFromCart,
-                            addToCart: (Product) {},
-                          )),
-                );
-                // Implement the desired action when the icon is pressed
-                print('Icon pressed!');
-              },
-            ),
-            PopupMenuButton(
-              itemBuilder: (BuildContext context) {
-                return [
-                  const PopupMenuItem(
-                    value: 'option1',
-                    child: Text('Grid View'),
-                  ),
-                  const PopupMenuItem(
-                    value: 'option2',
-                    child: Text('List View'),
-                  ),
-                  const PopupMenuItem(
-                    value: 'option3',
-                    child: Text('Help'),
-                  )
-                ];
-              },
-              onSelected: (value) {
-                // Handle menu item selection here
-                print('Selected: $value');
-              },
-            ),
-          ],
-          bottom: TabBar(
-            tabs: tabs,
-            isScrollable: true,
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.sizeOf(context).width;
+
+    return Scaffold(
+      appBar: AppBar(actions: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            width * 0.1, // Left padding (0% of screen width)
+            height * 0.0, // Top padding (0% of screen height)
+            width * 0.15, // Right padding (50% of screen width)
+            height * 0.0, // Bottom padding (10% of screen height)
+          ),
+          child: IconButton(
+            icon: Image.asset(
+                'assets/icons/myvazi_app_logo.png'), // Add your desired icon here
+            onPressed: () {
+              // Implement the desired action when the icon is pressed
+              print('Icon pressed!');
+            },
           ),
         ),
-        drawer: const DrawerActions(),
-        body: TabBarView(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: Center(
-                child: GridView.custom(
-                  padding: const EdgeInsets.only(
-                    bottom: 0.0,
-                    left: 4.0,
-                    right: 0.0,
-                  ),
-                  gridDelegate: SliverWovenGridDelegate.count(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 1,
-                    crossAxisSpacing: 1,
-                    // repeatPattern: QuiltedGridRepeatPattern.inverted,
-                    pattern: const [
-                      // QuiltedGridTile(2, 3),
-                      WovenGridTile(2 / 3),
-                      WovenGridTile(
-                        2 / 3,
-                        crossAxisRatio: 1.0,
-                        alignment: AlignmentDirectional.center,
-                      ),
-                    ],
-                  ),
-                  childrenDelegate:
-                      SliverChildBuilderDelegate((context, index) {
-                    if (index < data.length) {
-                      return GestureDetector(
+        IconButton(
+          icon: const Icon(Icons.search), // Add your desired icon here
+          onPressed: () {
+            // Implement the desired action when the icon is pressed
+            print('Icon pressed!');
+          },
+        ),
+        IconButton(
+          icon: const Icon(
+              Icons.shopping_basket_outlined), // Add your desired icon here
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => CartScreen(
+                        cart: cart,
+                        removeFromCart: removeFromCart,
+                        addToCart: (Product) {},
+                      )),
+            );
+            // Implement the desired action when the icon is pressed
+            print('Icon pressed!');
+          },
+        ),
+        PopupMenuButton(
+          itemBuilder: (BuildContext context) {
+            return [
+              const PopupMenuItem(
+                value: 'option1',
+                child: Text('Grid View'),
+              ),
+              const PopupMenuItem(
+                value: 'option2',
+                child: Text('List View'),
+              ),
+              const PopupMenuItem(
+                value: 'option3',
+                child: Text('Help'),
+              )
+            ];
+          },
+          onSelected: (value) {
+            // Handle menu item selection here
+            print('Selected: $value');
+          },
+        ),
+      ]),
+      drawer: const DrawerActions(),
+      body: SingleChildScrollView(
+          child: Column(
+        children: [
+          Container(
+            height: 40,
+            padding: EdgeInsets.fromLTRB(MediaQuery.sizeOf(context).width * .1,
+                0, MediaQuery.sizeOf(context).width * .1, 0),
+            child: home == null
+                ? Container()
+                : ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: ourHomeList?.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      home = ourHomeList!.elementAt(index);
+                      String tabName = home!.values.elementAt(0);
+
+                      return InkWell(
                         onTap: () {
-                          Item selected = data[index];
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ProductView(item: selected),
-                            ),
-                          );
+                          setState(() {
+                            positionedTab = index;
+                            positionedTabb = 0;
+                          });
+                          homeData(index, 0);
                         },
-                        child: Card(
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(2.0),
-                          ),
+                        onHover: (s) {
+                          setState(() {
+                            hoverPosition = index;
+                          });
+                        },
+                        hoverColor: Colors.grey[200],
+                        child: Container(
+                          height: 50,
+                          padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Image.asset(
-                                data[index].image,
-                                height:
-                                    MediaQuery.of(context).size.height * 0.28,
-                                width: MediaQuery.of(context).size.width * 0.48,
-                                fit: BoxFit.cover,
+                              const SizedBox(
+                                height: 1,
                               ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    data[index].desc,
+                              Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      1.0, 16.0, 1.0, 0.0),
+                                  child: Text(
+                                    tabName.toUpperCase(),
                                     style: const TextStyle(
-                                        fontSize: 12.0, color: Colors.grey),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500),
                                   ),
-                                  Row(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            16.0, 4.0, 0.0, 0.0),
-                                        child: Text(
-                                          '${data[index].amount}',
-                                          style: const TextStyle(
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                ),
                               ),
+                              index == positionedTab
+                                  ? Container(
+                                      width: tabName.characters.length * 6,
+                                      height: 3,
+                                      decoration: BoxDecoration(
+                                          color: Colors.grey[800]),
+                                    )
+                                  : const SizedBox(
+                                      height: 1,
+                                    )
                             ],
                           ),
                         ),
                       );
-                    } else {
-                      return null;
-                    }
-                  }),
+                    },
+                  ),
+          ),
+          subCatProducts!.isEmpty
+              ? const SizedBox()
+              : SizedBox(
+                  height: height,
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing:
+                          height * 0.001, // Vertical spacing between cards
+                      crossAxisSpacing: height * 0.001,
+                    ),
+                    itemCount: subCatProducts!.length,
+                    itemBuilder: (BuildContext context, int indexing) {
+                      Map subCatprods = subCatProducts![indexing];
+                      String price = subCatprods.values.elementAt(2).toString();
+                      String name = subCatprods.values.elementAt(1);
+                      List<String> prodImages = [];
+                      for (var i = 3; i < 6; i++) {
+                        if (subCatprods.values
+                            .elementAt(i)
+                            .toString()
+                            .contains('http')) {
+                          prodImages.add(subCatprods.values.elementAt(i));
+                        }
+                      }
+                      return Padding(
+                        padding: EdgeInsets.fromLTRB(width * 0.01,
+                            height * 0.01, width * 0.01, height * 0.0),
+                        child: Container(
+                          height: height * 1.0,
+                          child: Card(
+                            elevation: 5,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                            ),
+                            child: Column(
+                              //crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                GestureDetector(
+                                  onTap: () {},
+                                  child: CarouselSlider(
+                                    options:
+                                        CarouselOptions(height: height * 0.16),
+                                    items: prodImages.map((i) {
+                                      return Builder(
+                                        builder: (BuildContext context) {
+                                          return Container(
+                                              margin: EdgeInsets.symmetric(
+                                                  horizontal: width * 0.01),
+                                              decoration: const BoxDecoration(
+                                                  color: Colors.white),
+                                              child: CachedNetworkImage(
+                                                  fit: BoxFit.fitHeight,
+                                                  imageUrl: i));
+                                        },
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.fromLTRB(
+                                          width * 0.04,
+                                          height * 0.0,
+                                          width * 0.04,
+                                          height * 0.0),
+                                      child: Text(
+                                        name,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontSize: 12.0),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.fromLTRB(
+                                          width * 0.04,
+                                          height * 0.0,
+                                          width * 0.04,
+                                          height * 0.0),
+                                      child: Text(
+                                        price,
+                                        style: const TextStyle(
+                                            fontSize: 18.0,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ),
-            const Center(child: Text('Content for Men')),
-            const Center(child: Text('Content for Women')),
-            const Center(child: Text('Content for Furnishings')),
-            const Center(child: Text('Content for Kids')),
-          ],
-        ),
-      ),
+        ],
+      )),
     );
   }
 }

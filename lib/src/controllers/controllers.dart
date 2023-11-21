@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:myvazi/src/configs/constants.dart';
 import 'package:myvazi/src/models/models.dart';
 import 'dart:io';
 
@@ -62,70 +63,6 @@ Future<SellerRatingsModel?> fetchSupplierRatings() async {
   }
 }
 
-// Future<List<SubcategoriesModel>> fetchSubcategories() async {
-//   try {
-//     // Make the HTTP request
-//     String url = Platform.isAndroid
-//         ? 'http://$ipAddress/twambale/api/get_sellers_subcategories.php'
-//         : 'http://localhost/twambale/api/get_sellers_subcategories.php';
-
-//     final Map<String, dynamic> requestData = {
-//       'action': 'getSellerSubCats',
-//       'seller_id': sellerId,
-//     };
-
-//     final response = await http.post(
-//       Uri.parse(url),
-//       headers: {
-//         'Content-Type': 'application/json; charset=UTF-8',
-//         'Accept': "*/*",
-//         'connection': 'keep-alive',
-//       },
-//       body: jsonEncode(requestData),
-//     );
-//     print(response.body);
-
-//     if (response.statusCode == 200) {
-//       // Parse the JSON response
-//       List<Map<String, dynamic>> data = json.decode(response.body);
-//       //print('Raw Response: ${response.headers}\n${response.body}');
-
-//       // Create a list of Subcategory objects
-//       List<SubcategoriesModel> subcategories = [];
-
-//       for (var entry in data) {
-//         String subcategoryName = entry['subcategoryName'];
-//         List<int> productIDs = entry['productID']
-//             .split(',')
-//             .map((id) => int.parse(id.trim()))
-//             .toList();
-
-//         print('API Response: $data');
-//         print('Subcategory: $subcategoryName, Product IDs: $productIDs');
-
-//         // Create a SubcategoriesModel instance and add it to the list
-//         SubcategoriesModel subcategory = SubcategoriesModel(
-//           subcategoryId: 0,
-//           subcategoryName: subcategoryName,
-//           productIDs: productIDs,
-//         );
-
-//         subcategories.add(subcategory);
-//       }
-
-//       return subcategories;
-//     } else {
-//       // Handle errors
-//       print('Failed to load data: ${response.statusCode}');
-//       return [];
-//     }
-//   } catch (error) {
-//     // Handle exceptions
-//     print('Error: $error');
-//     return [];
-//   }
-// }
-
 Future<List<Product>?> parseSubcategories() async {
   String url = Platform.isAndroid
       ? 'http://$ipAddress/twambale/api/get_sellers_subcategories.php'
@@ -145,55 +82,27 @@ Future<List<Product>?> parseSubcategories() async {
     },
     body: jsonEncode(requestData),
   );
-
-  //print('Raw Server Response: ${response.body}');
-
   if (response.body.isEmpty) {
     print('Server response is empty or null.');
-
     return null;
+  } else {
+    // Parse the JSON string into a Map<String, dynamic>
+    Map<String, dynamic> jsonMap = json.decode(response.body);
+    storeMap.value = jsonMap;
   }
-
-  // Parse the JSON string into a Map<String, dynamic>
-  Map<String, dynamic> jsonMap = json.decode(response.body);
-
-  // Convert each entry into a SubcategoryModel
-  List<SubcategoryModel> subcategories = jsonMap.entries.map((entry) {
-    return SubcategoryModel.fromJson(entry.value);
-  }).toList();
-
-// Print the results
-  subcategories.forEach((subcategory) {
-    print('SubcategoryId: ${subcategory.subcategoryId}');
-    print('SubcategoryName: ${subcategory.subcategoryName}');
-    print('ProductIDs: ${subcategory.productIDs}');
-
-    // Iterate through products and print details
-    subcategory.products.forEach((product) {
-      print('Product ID: ${product.productId}');
-      print('Product Name: ${product.name}');
-      print('Product Sizes: ${product.productSizes}');
-      print('Product Images: ${product.productImages}');
-      print('---');
-    });
-
-    print('---');
-  });
   return null;
 }
 
-/*
-Future<List<SubcategoriesModel>?> fetchSubcategories() async {
+Future<List?> fetchMaincategories() async {
   try {
     String url = Platform.isAndroid
-        ? 'http://$ipAddress/twambale/api/get_sellers_subcategories.php'
-        : 'http://localhost/twambale/api/get_sellers_subcategories.php';
+        ? 'http://$ipAddress/twambale/api/get_maincategories_with_products.php'
+        : 'http://localhost/twambale/api/get_maincategories_with_products.php';
 
     final Map<String, dynamic> requestData = {
-      'action': 'getSellerSubCats',
-      'seller_id': sellerId,
+      'action': 'getAllMainCategoriesWithProducts',
     };
-
+//print(response.body);
     final response = await http.post(
       Uri.parse(url),
       headers: {
@@ -205,9 +114,9 @@ Future<List<SubcategoriesModel>?> fetchSubcategories() async {
 
     if (response.statusCode == 200) {
       List<dynamic> rawData = json.decode(response.body);
-      List<SubcategoriesModel> subcategoriesList =
-          rawData.map((subcat) => SubcategoriesModel.fromJson(subcat)).toList();
-      return subcategoriesList;
+
+      homeList.value = rawData;
+      // print(homeList.value);
     } else {
       throw Exception('Failed to load subcategories');
     }
@@ -217,5 +126,3 @@ Future<List<SubcategoriesModel>?> fetchSubcategories() async {
   }
   return null;
 }
-
-*/

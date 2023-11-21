@@ -277,7 +277,7 @@ class _SaleState extends State<Sale> {
                                               child: Image.asset(
                                                 data[index].image,
                                                 width: 270.0,
-                                                height: 400.0,
+                                                height: 320.0,
                                               ),
                                             ),
                                           ),
@@ -443,7 +443,7 @@ class _SaleState extends State<Sale> {
                                         children: [
                                           Image.asset(
                                             data[index].image,
-                                            height: 400.0,
+                                            height: 320.0,
                                             width: 270.0,
                                             fit: BoxFit.cover,
                                           ),
@@ -552,7 +552,7 @@ class _SaleState extends State<Sale> {
                                         children: [
                                           Image.asset(
                                             data[index].image,
-                                            height: 400.0,
+                                            height: 320.0,
                                             width: 270.0,
                                             fit: BoxFit.cover,
                                           ),
@@ -660,7 +660,7 @@ class _SaleState extends State<Sale> {
                                         children: [
                                           Image.asset(
                                             data[index].image,
-                                            height: 400.0,
+                                            height: 320.0,
                                             width: 270.0,
                                             fit: BoxFit.cover,
                                           ),
@@ -743,7 +743,7 @@ class _SaleState extends State<Sale> {
                           ),
                         ),
                       ),
-                      body: TabBarView(
+                      body: TabBarView( 
                         children: [
                           // Add your tab content for the first DefaultTabController here
                           Center(
@@ -763,7 +763,7 @@ class _SaleState extends State<Sale> {
                                         children: [
                                           Image.asset(
                                             data[index].image,
-                                            height: 400.0,
+                                            height: 320.0,
                                             width: 270.0,
                                             fit: BoxFit.cover,
                                           ),
