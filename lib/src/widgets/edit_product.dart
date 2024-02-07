@@ -47,9 +47,6 @@ class _EditProductState extends State<EditProduct> {
     }
   }
 
-
-
-
   // Future<void> sendDataToApi() async {
   //
   //   final Map<String, dynamic> data = {
@@ -92,12 +89,12 @@ class _EditProductState extends State<EditProduct> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Failed to send data. Status code: ${response.message}"),
+          content:
+              Text("Failed to send data. Status code: ${response.message}"),
         ),
       );
     }
   }
-
 
   // Call this function where you receive the API response
   // void showApiResponseStatus(BuildContext context, String responseStatus) {
@@ -132,7 +129,7 @@ class _EditProductState extends State<EditProduct> {
                       bottomRight: Radius.circular(15.0),
                     ),
                     child: Image.asset(
-                      "assets/images/image1.jpg",
+                      "assets/images/default_image.png",
                       height: 300.0,
                       width: double.infinity,
                       fit: BoxFit.cover,
@@ -183,7 +180,8 @@ class _EditProductState extends State<EditProduct> {
                 width: 300.0,
                 child: TextFormField(
                   controller: _amountController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   decoration: const InputDecoration(
                     hintText: '0.00',
                   ),
@@ -191,7 +189,8 @@ class _EditProductState extends State<EditProduct> {
                     if (value!.isEmpty) {
                       return 'Please enter an amount';
                     }
-                    onChanged: (value) {
+                    onChanged:
+                    (value) {
                       setState(() {
                         amount = value;
                       });
@@ -224,6 +223,7 @@ class _EditProductState extends State<EditProduct> {
     );
   }
 }
+
 class ApiResponse {
   final bool success;
   final String message;

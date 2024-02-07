@@ -81,7 +81,7 @@ Future<OrdersModel?> fetchOrdersFromPHP() async {
       // return List<Map<String, dynamic>>.from(orders);
       final items = json.decode(response.body);
       OrdersModel ordersModels = OrdersModel.fromJson(items);
-      print(ordersModels);
+      //print(ordersModels);
 
       return ordersModels;
     }

@@ -16,13 +16,14 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   Map<String, dynamic> userData = {};
 
-  String defaultImage = 'assets/images/image2.jpg';
+  String defaultImage = 'assets/images/default_image.jpg';
 
   @override
   void initState() {
     super.initState();
-    final userProvider = Provider.of<UserDataProvider>(context, listen: false);
-    userProvider.fetchUsersData();
+    final sellerProvider =
+        Provider.of<SellerDataProvider>(context, listen: false);
+    sellerProvider.fetchSellersData();
     final sellerRatingProvider =
         Provider.of<SellerRatingsProvider>(context, listen: false);
     sellerRatingProvider.fetchSellerRatingsData();
@@ -31,30 +32,35 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     // Access the User Data Provider using Provider.of
-    final userProvider = Provider.of<UserDataProvider>(context);
+    final sellerProvider = Provider.of<SellerDataProvider>(context);
     final sellerRatingProvider = Provider.of<SellerRatingsProvider>(context);
-    var username = userProvider.users?.userName;
-    var phoneNo = userProvider.users?.userPhone;
+    var username = sellerProvider.sellers?.userName;
+    var phoneNo = sellerProvider.sellers?.userPhone;
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+    double sizeWidth =
+        screenWidth < 400 ? screenWidth * 0.1 : screenWidth * 0.04;
+    double spacingBetween =
+        screenWidth < 400 ? screenWidth * 0.01 : screenWidth * 0.3;
 
     return DefaultTabController(
       length: 3, // Set the number of tabs
       child: Scaffold(
         appBar: AppBar(
           bottom: PreferredSize(
-            preferredSize:
-                Size.fromHeight(MediaQuery.of(context).size.width * 0.12),
+            preferredSize: const Size.fromHeight(kToolbarHeight),
             // Adjust the height as needed
             child: Row(
               children: [
                 Padding(
-                  padding: EdgeInsets.only(
-                      left: MediaQuery.of(context).size.width * 0.05),
-                  child: const Column(
+                  padding: EdgeInsets.only(left: spacingBetween),
+                  child: Column(
                     children: [
                       CircleAvatar(
-                          radius: 30.0,
-                          backgroundImage:
-                              AssetImage('assets/images/image2.jpg')),
+                        radius: sizeWidth, // Default radius for larger screens
+                        backgroundImage:
+                            const AssetImage('assets/images/default_image.png'),
+                      ),
                     ],
                   ),
                 ),
@@ -62,17 +68,21 @@ class _ProfileState extends State<Profile> {
                   Column(
                     children: [
                       Padding(
-                        padding: EdgeInsets.only(
-                            left: MediaQuery.of(context).size.width * 0.04),
+                        padding: EdgeInsets.only(left: spacingBetween),
                         child: Row(
                           children: [
-                            Text(username),
+                            Text(
+                              username,
+                              style: TextStyle(
+                                fontSize: screenHeight * 0.02,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.only(
-                            left: MediaQuery.of(context).size.width * 0.03),
+                        padding: EdgeInsets.only(left: spacingBetween),
                         child: Row(
                           children: [
                             Text(phoneNo),
@@ -81,8 +91,7 @@ class _ProfileState extends State<Profile> {
                       ),
                       if (sellerRatingProvider.sellerRatings != null)
                         Padding(
-                          padding: EdgeInsets.only(
-                              left: MediaQuery.of(context).size.width * 0.04),
+                          padding: EdgeInsets.only(left: spacingBetween),
                           child: Row(
                             children: [
                               StarRating(
@@ -103,27 +112,22 @@ class _ProfileState extends State<Profile> {
                   const Center(
                     child: Text("No Users"),
                   ),
-                SizedBox(width: MediaQuery.of(context).size.width * 0.04),
-                Column(
-                  // crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextButton.icon(
-                      onPressed: () {
-                        // Add your onPressed action here
-                        Navigator.pushNamed(
-                          context,
-                          '/account-edit',
-                          arguments: {
-                            'defaultImage': defaultImage,
-                            'username': username,
-                            'phoneNo': phoneNo,
-                          },
-                        );
+                SizedBox(width: screenWidth * 0.03),
+                TextButton.icon(
+                  onPressed: () {
+                    // Add your onPressed action here
+                    Navigator.pushNamed(
+                      context,
+                      '/account-edit',
+                      arguments: {
+                        'defaultImage': defaultImage,
+                        'username': username,
+                        'phoneNo': phoneNo,
                       },
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Edit'),
-                    ),
-                  ],
+                    );
+                  },
+                  icon: const Icon(Icons.edit),
+                  label: const Text('Edit'),
                 )
               ],
             ),

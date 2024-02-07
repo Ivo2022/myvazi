@@ -16,7 +16,7 @@ class _AccountEditState extends State<AccountEdit> {
   String subcategory = '';
   String name = '';
   double amount = 0.0;
-  String defaultImage = 'assets/images/image2.jpg';
+  String defaultImage = 'assets/images/default_image.png';
   String initialCountry = 'KE'; // Set the initial country code as desired.
   final TextEditingController controller = TextEditingController();
 
@@ -44,7 +44,7 @@ class _AccountEditState extends State<AccountEdit> {
             as Map<String, dynamic>?;
 
     // Initialize variables in the build method
-    selectedImage = arguments?['defaultImage'] ?? '';
+    selectedImage = arguments?['selectedImage'] ?? defaultImage;
     username = arguments?['username'] ?? '';
     phoneNo = arguments?['phoneNo'] ?? '';
 
@@ -58,7 +58,9 @@ class _AccountEditState extends State<AccountEdit> {
       appBar: AppBar(
         actions: [
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              
+            },
             child: const Padding(
               padding: EdgeInsets.all(8.0),
               child: Text("UPDATE"),
@@ -79,33 +81,30 @@ class _AccountEditState extends State<AccountEdit> {
               children: <Widget>[
                 // Text widget
                 SizedBox(
-                  width: 300.0,
+                  height: MediaQuery.of(context).size.height * 0.5,
                   // ignore: unnecessary_null_comparison
                   child: selectedImage != null
                       ? Image.asset(selectedImage)
                       : Image.asset(defaultImage),
                 ),
                 SizedBox(
-                  width: 300.0,
-                  child: TextField(
-                    controller: usernameController,
-                    decoration: const InputDecoration(
-                      hintText: 'Name',
-                    ),
+                  height: MediaQuery.of(context).size.height * 0.01,
+                ),
+                TextField(
+                  controller: usernameController,
+                  decoration: const InputDecoration(
+                    hintText: 'Name',
                   ),
                 ),
 
                 SizedBox(
-                  width: MediaQuery.of(context).size.height * 0.32,
-                  child: SizedBox(
-                    width: 200.0,
-                    child: TextField(
-                      controller: phoneController,
-                      decoration: const InputDecoration(
-                        hintText: '+256...',
-                        labelText: 'Phone Number',
-                      ),
-                    ),
+                  height: MediaQuery.of(context).size.height * 0.01,
+                ),
+                TextField(
+                  controller: phoneController,
+                  decoration: const InputDecoration(
+                    hintText: '+256...',
+                    labelText: 'Phone Number',
                   ),
                 ),
               ],

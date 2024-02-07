@@ -1,16 +1,31 @@
 import 'dart:convert';
+//import 'package:hive/hive.dart';
+//part 'models.g.dart';
 
-UsersModel usersFromJson(String str) => UsersModel.fromJson(json.decode(str));
-String usersToJson(UsersModel data) => json.encode(data.toJson());
+// sizes_data.dart
 
-class UsersModel {
+List<Map<String, dynamic>> sizesData = [];
+
+void setSizesData(List<Map<String, dynamic>> data) {
+  sizesData = data;
+}
+
+List<Map<String, dynamic>> getSizesData() {
+  return sizesData;
+}
+
+SellersModel sellersFromJson(String str) =>
+    SellersModel.fromJson(json.decode(str));
+String sellersToJson(SellersModel data) => json.encode(data.toJson());
+
+class SellersModel {
   String userName;
   String userPhone;
+//
+  SellersModel({required this.userName, required this.userPhone});
 
-  UsersModel({required this.userName, required this.userPhone});
-
-  factory UsersModel.fromJson(Map<String, dynamic> json) {
-    return UsersModel(
+  factory SellersModel.fromJson(Map<String, dynamic> json) {
+    return SellersModel(
       userName:
           json['name'] as String, // Provide a default value if 'name' is null
       userPhone: json['phone_number']
@@ -22,6 +37,39 @@ class UsersModel {
     return {
       'name': userName,
       'phone_number': userPhone,
+    };
+  }
+}
+
+UsersModel usersFromJson(String str) => UsersModel.fromJson(json.decode(str));
+String usersToJson(UsersModel data) => json.encode(data.toJson());
+
+class UsersModel {
+  String? name;
+  String? phone;
+  String? location;
+  String? town;
+
+  UsersModel(
+      {required this.name,
+      required this.phone,
+      required this.location,
+      this.town});
+
+  factory UsersModel.fromJson(Map<String, dynamic> json) {
+    return UsersModel(
+        name: json['name'],
+        phone: json['phone_number'],
+        location: json['location'],
+        town: json['town']);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'phone_number': phone,
+      'location': location,
+      'town': town
     };
   }
 }
@@ -53,41 +101,6 @@ class SellerRatingsModel {
     };
   }
 }
-
-// SubcategoriesModel subcategoriesFromJson(String str) =>
-//     SubcategoriesModel.fromJson(json.decode(str));
-// String subcategoriesToJson(SubcategoriesModel data) =>
-//     json.encode(data.toJson());
-
-// class SubcategoriesModel {
-//   final int subcategoryId;
-//   final String subcategoryName;
-//   final List<int> productIDs;
-
-//   SubcategoriesModel({
-//     required this.subcategoryId,
-//     required this.subcategoryName,
-//     required this.productIDs,
-//   });
-
-//   factory SubcategoriesModel.fromJson(Map<String, dynamic> json) {
-//     List<int> productID =
-//         json['productID'].split(',').map((id) => int.parse(id)).toList();
-//     return SubcategoriesModel(
-//       subcategoryId: json['subcategoryId'],
-//       subcategoryName: json['subcategoryName'],
-//       productIDs: productID,
-//     );
-//   }
-
-//   Map<String, dynamic> toJson() {
-//     return {
-//       'subcategoryId': subcategoryId,
-//       'subcategoryName': subcategoryName,
-//       'productID': productIDs,
-//     };
-//   }
-// }
 
 ProductDetailsModel productdetailsFromJson(String str) =>
     ProductDetailsModel.fromJson(json.decode(str));
@@ -173,77 +186,6 @@ class ProductSizeModel {
     };
   }
 }
-
-
-// SubcategoryModel subcategoryFromJson(String str) =>
-//     SubcategoryModel.fromJson(json.decode(str));
-// String subcategoryToJson(SubcategoryModel data) => json.encode(data.toJson());
-
-// class SubcategoryModel {
-//   final int subcategoryId;
-//   final String subcategoryName;
-//   final List<int> productIDs;
-
-//   SubcategoryModel({
-//     required this.subcategoryId,
-//     required this.subcategoryName,
-//     required this.productIDs,
-//   });
-
-//   // factory SubcategoryModel.fromJson(Map<String, dynamic> json) {
-//   //   print('Parsing JSON: $json');
-//   //   List<int> productIDs = (json['productID'] as String)
-//   //       .split(',')
-//   //       .map((id) => int.parse(id))
-//   //       .toList();
-//   //   print('Parsed productIDs: $productIDs');
-//   //   return SubcategoryModel(
-//   //     subcategoryId: json['subcategoryId'] as int,
-//   //     subcategoryName: json['subcategoryName'] as String,
-//   //     productIDs: productIDs,
-//   //   );
-//   // }
-
-//   factory SubcategoryModel.fromJson(Map<String, dynamic> json) {
-//     print('Parsing JSON: $json');
-
-//     final dynamic rawProductID = json['productID'];
-//     final dynamic rawSubcategoryId = json['subcategoryId'];
-//     final dynamic rawSubcategoryName = json['subcategoryName'];
-
-//     print('Raw productID: $rawProductID');
-//     print('Raw subcategoryId: $rawSubcategoryId');
-//     print('Raw subcategoryName: $rawSubcategoryName');
-
-//     List<int> productIDs = (rawProductID as String?)
-//             ?.split(',')
-//             .map((id) => int.parse(id.trim()))
-//             .toList() ??
-//         [];
-
-//     print('Parsed productIDs: $productIDs');
-
-//     int subcategoryId = rawSubcategoryId as int? ?? 0;
-//     String subcategoryName = rawSubcategoryName as String? ?? '';
-
-//     print('Parsed subcategoryId: $subcategoryId');
-//     print('Parsed subcategoryName: $subcategoryName');
-
-//     return SubcategoryModel(
-//       subcategoryId: subcategoryId,
-//       subcategoryName: subcategoryName,
-//       productIDs: productIDs,
-//     );
-//   }
-
-//   Map<String, dynamic> toJson() {
-//     return {
-//       'subcategoryId': subcategoryId,
-//       'subcategoryName': subcategoryName,
-//       'productID': productIDs,
-//     };
-//   }
-// }
 
 class SubcategoryModel {
   final int subcategoryId;
@@ -391,3 +333,36 @@ class ProductImage {
     );
   }
 }
+
+// ProductsModel productsFromJson(String str) => ProductsModel.fromJson(json.decode(str));
+// String productsToJson(ProductsModel data) => json.encode(data.toJson());
+
+// class ProductsModel {
+//   String? name;
+//   String? phone;
+//   String? location;
+//   String? town;
+
+//   UsersModel(
+//       {required this.name,
+//       required this.phone,
+//       required this.location,
+//       this.town});
+
+//   factory UsersModel.fromJson(Map<String, dynamic> json) {
+//     return UsersModel(
+//         name: json['name'],
+//         phone: json['phone_number'],
+//         location: json['location'],
+//         town: json['town']);
+//   }
+
+//   Map<String, dynamic> toJson() {
+//     return {
+//       'name': name,
+//       'phone_number': phone,
+//       'location': location,
+//       'town': town
+//     };
+//   }
+// }

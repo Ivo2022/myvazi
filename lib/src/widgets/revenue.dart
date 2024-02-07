@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:myvazi/src/configs/constants.dart';
 import 'package:myvazi/src/services/make_payment.dart';
 // import 'package:myvazi/src/widgets/make_payment.dart';
 import 'package:http/http.dart' as http;
@@ -21,8 +22,8 @@ class _RevenueState extends State<Revenue> {
   String totalRevenue = "";
   Map<String, dynamic> currentMonthOrders = {};
   String totalPayments = "";
-  int sellerId = 152;
-  String ipAddress = "192.168.43.65";
+  int sellerId = MainConstants.sellerId;
+  String ipAddress = MainConstants.ipAddress; //172.16.0.207 & 192.168.43.65
 
   int deliveredStatus = 1;
   final double itemHeight = 36.0; // Adjust this value accordingly
@@ -35,8 +36,9 @@ class _RevenueState extends State<Revenue> {
     fetchTotalRevenue();
     fetchCurrMonthOrders();
     fetchsellerPayments();
-    final userProvider = Provider.of<UserDataProvider>(context, listen: false);
-    userProvider.fetchUsersData();
+    final sellerProvider =
+        Provider.of<SellerDataProvider>(context, listen: false);
+    sellerProvider.fetchSellersData();
   }
 
   fetchMonthlyOrders() async {
@@ -166,27 +168,52 @@ class _RevenueState extends State<Revenue> {
       'delivered_status': deliveredStatus,
     };
 
-    final response = await http.post(Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Accept': "*/*",
-          'connection': 'keep-alive',
-        },
-        body: jsonEncode(requestData));
+    try {
+      final response = await http.post(Uri.parse(url),
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Accept': "*/*",
+            'connection': 'keep-alive',
+          },
+          body: jsonEncode(requestData));
 
-    if (response.statusCode == 200) {
-      if (response.body.isNotEmpty) {
-        // return data.cast<Map<String, dynamic>>();
+      if (response.statusCode == 200) {
+        if (response.body.isNotEmpty) {
+          setState(() {
+            currentMonthOrders = json.decode(response.body);
+          });
 
-        setState(() {
-          currentMonthOrders = json.decode(response.body);
-        });
-
-        return currentMonthOrders;
+          return currentMonthOrders;
+        }
+      } else {
+        // Handle the error
+        throw Exception('Failed to load data: ${response.statusCode}');
       }
-    } else {
-      // Handle the error
-      throw Exception('Failed to load data: ${response.statusCode}');
+    } catch (e) {
+      // Handle exceptions gracefully
+      print('Error: $e');
+      // Show an error message to the user
+      // ignore: use_build_context_synchronously
+      // showDialog(
+      //   context: context,
+      //   builder: (context) {
+      //     return AlertDialog(
+      //       title: const Text("Error"),
+      //       content: const Text("No previous monthly data!"),
+      //       actions: <Widget>[
+      //         TextButton(
+      //           onPressed: () {
+      //             Navigator.of(context).pop();
+      //           },
+      //           child: const Text("OK"),
+      //         ),
+      //       ],
+      //     );
+      //   },
+      // );
+
+      // You can choose to return a default value or re-throw the exception
+      return [];
     }
   }
 
@@ -256,9 +283,9 @@ class _RevenueState extends State<Revenue> {
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserDataProvider>(context);
-    userProvider.fetchUsersData();
-    String? phoneNo = userProvider.users?.userPhone ?? "No phone Number";
+    final sellerProvider = Provider.of<SellerDataProvider>(context);
+    sellerProvider.fetchSellersData();
+    String? phoneNo = sellerProvider.sellers?.userPhone ?? "No phone Number";
     var height = MediaQuery.sizeOf(context).height;
 
     return SingleChildScrollView(
@@ -279,28 +306,34 @@ class _RevenueState extends State<Revenue> {
                 : ListView.builder(
                     itemCount: currentMonthOrders.length,
                     itemBuilder: (BuildContext context, int index) {
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(right: height * .17),
-                              child: Text(
-                                currentMonthOrders.values.first,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
+                      try {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(right: height * .17),
+                                child: Text(
+                                  currentMonthOrders.values.first,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
                               ),
-                            ),
-                            // SizedBox(width: 10.0),
-                            Text(currentMonthOrders.values.last),
-                          ],
-                        ),
-                      );
+                              // SizedBox(width: 10.0),
+                              Text(currentMonthOrders.values.last),
+                            ],
+                          ),
+                        );
+                      } catch (e) {
+                        // Handle the case where the index is out of range
+                        return const Text(
+                            "No previous monthly data found"); // or any other widget you want to display
+                      }
                     }),
           ),
           SizedBox(
-            height: MediaQuery.of(context).size.height * 0.08,
+            height: height * 0.08,
             child: totalPayments.isEmpty
                 ? const Center(
                     child: Text("No payments data"),
@@ -378,23 +411,28 @@ class _RevenueState extends State<Revenue> {
                     itemCount: monthlyOrders.length,
                     itemBuilder: (BuildContext context, int index) {
                       // Your existing code for each item
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              monthlyOrders.keys.toList().elementAt(index),
-                            ),
-                            Text(
-                              monthlyOrders.values
-                                  .toList()
-                                  .elementAt(index)
-                                  .toString(),
-                            ),
-                          ],
-                        ),
-                      );
+                      try {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                monthlyOrders.keys.toList().elementAt(index),
+                              ),
+                              Text(
+                                monthlyOrders.values
+                                    .toList()
+                                    .elementAt(index)
+                                    .toString(),
+                              ),
+                            ],
+                          ),
+                        );
+                      } catch (e) {
+                        // Handle the case where the index is out of range
+                        return null; // or any other widget you want to display
+                      }
                     },
                   ),
           ),
@@ -417,19 +455,24 @@ class _RevenueState extends State<Revenue> {
                     itemCount: yearlyOrders.length,
                     itemExtent: itemHeight, // Set the height of each item
                     itemBuilder: (BuildContext context, int index) {
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(yearlyOrders.keys.toList().elementAt(index)),
-                            Text(yearlyOrders.values
-                                .toList()
-                                .elementAt(index)
-                                .toString()),
-                          ],
-                        ),
-                      );
+                      try {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(yearlyOrders.keys.toList().elementAt(index)),
+                              Text(yearlyOrders.values
+                                  .toList()
+                                  .elementAt(index)
+                                  .toString()),
+                            ],
+                          ),
+                        );
+                      } catch (e) {
+                        // Handle the case where the index is out of range
+                        return null; // or any other widget you want to display
+                      }
                     },
                   ),
           ),

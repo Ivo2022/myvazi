@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:myvazi/src/configs/constants.dart';
 import 'package:provider/provider.dart';
 import 'package:myvazi/src/utils/providers.dart';
 
@@ -16,8 +17,8 @@ class _SupplierReviewState extends State<SupplierReview> {
   List<Map<String, dynamic>> supplierComments = [];
   List<Map<String, dynamic>> supplierRatings = [];
 
-  int sellerId = 152;
-  String ipAddress = "192.168.43.65";
+  int sellerId = MainConstants.sellerId;
+  String ipAddress = MainConstants.ipAddress; //172.16.0.207 & 192.168.43.65
 
   @override
   void initState() {
@@ -137,34 +138,39 @@ class _SupplierReviewState extends State<SupplierReview> {
             shrinkWrap: true,
             itemCount: supplierComments.length,
             itemBuilder: (BuildContext context, int index) {
-              return Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(40.0, 4.0, 16.0, 4.0),
-                    child: Row(
-                      children: [
-                        Text(
-                          supplierComments[index]['date_created'],
-                        ),
-                        const SizedBox(width: 40.0),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                supplierComments[index]['comment'] ??
-                                    'No comment available',
-                                softWrap:
-                                    true, // This allows text to wrap to the next line
-                              ),
-                            ],
+              try {
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(40.0, 4.0, 16.0, 4.0),
+                      child: Row(
+                        children: [
+                          Text(
+                            supplierComments[index]['date_created'],
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 40.0),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  supplierComments[index]['comment'] ??
+                                      'No comment available',
+                                  softWrap:
+                                      true, // This allows text to wrap to the next line
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              );
+                  ],
+                );
+              } catch (e) {
+                // Handle the case where the index is out of range
+                return null; // or any other widget you want to display
+              }
             },
           ),
         ),

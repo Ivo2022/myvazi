@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "458925774414",
+    "project_id": "my-vazi",
+    "storage_bucket": "my-vazi.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:458925774414:android:0e7b22db17988828a1151f",
+        "android_client_info": {
+          "package_name": "com.example.myvazi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-_fpSBV7TMaZyet5jTlId9Nbw6l7xvUQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
