@@ -55,10 +55,10 @@ class SalesResponse {
 
                 // Navigate to the next screen
                 // ignore: use_build_context_synchronously
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Routing()),
-                );
+                // Navigator.pushReplacement(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => Routing()),
+                // );
               },
             ),
           ],

@@ -18,7 +18,7 @@ class _SalesDetailsState extends State<SalesDetails> {
   late Map<dynamic, dynamic> arguments;
   late String tabName;
   // Replace the placeholder image URL with your actual image URL
-  String imageUrlSquare = ServerConfig.defaultImageSquare;
+  String imageUrlSquare = ServerConfig.defaultProductImage;
 
   String imageUrl = ServerConfig.defaultImage;
 
@@ -31,11 +31,8 @@ class _SalesDetailsState extends State<SalesDetails> {
 
   @override
   Widget build(BuildContext context) {
-    print('We are now within sales_details: $arguments');
-
     List<dynamic> orderItemDetailsList = arguments.values.elementAt(0);
     Map orderItemDetailsMap = orderItemDetailsList.first;
-    print(orderItemDetailsMap);
     Map<String, dynamic> productDetailsMap = arguments.values.elementAt(1);
     String productTitle = productDetailsMap.values.elementAt(2);
     String productPurpose = productDetailsMap.values.elementAt(3);
@@ -49,18 +46,18 @@ class _SalesDetailsState extends State<SalesDetails> {
     // print(imageUrlSquare);
     // print("${ServerConfig.baseUrl}${ServerConfig.uploads}$profileImage");
     String orderNo = orderItemDetailsMap.values.elementAt(8);
-    int orderId = orderItemDetailsMap.values.elementAt(1);
-    int amount = orderItemDetailsMap.values.elementAt(5);
-    int orderItems = orderItemDetailsMap.values.elementAt(4);
+    int orderId = int.parse(orderItemDetailsMap.values.elementAt(1));
+    int amount = int.parse(orderItemDetailsMap.values.elementAt(5));
+    int orderItems = int.parse(orderItemDetailsMap.values.elementAt(4));
     String seller = capitalizeFirstLetter(buyerDetailsMap.values.elementAt(2));
     // String? imageUrl = ServerConfig.defaultImage;
     String telephone = buyerDetailsMap.values.elementAt(1);
     String dateOrdered = orderItemDetailsMap.values.elementAt(10);
     String location = buyerDetailsMap.values.elementAt(5);
     String town = buyerDetailsMap.values.elementAt(6);
-    int deliveredStatus = orderItemDetailsMap.values.elementAt(6);
-    int cancellation = orderItemDetailsMap.values.elementAt(9);
-    int sizeID = orderItemDetailsMap.values.elementAt(3);
+    int deliveredStatus = int.parse(orderItemDetailsMap.values.elementAt(6));
+    int cancellation = int.parse(orderItemDetailsMap.values.elementAt(9));
+    int sizeID = int.parse(orderItemDetailsMap.values.elementAt(3));
     // String imageUrlSquare = arguments.values.elementAt(4);
     // String profileImage = arguments.values.elementAt(10);
     // String dateOrdered = arguments.values.elementAt(5);
@@ -136,10 +133,10 @@ class _SalesDetailsState extends State<SalesDetails> {
                     width: 40, // Take the full width available
                     fit: BoxFit.cover,
                     imageUrl: profileImage.isNotEmpty
-                        ? "${ServerConfig.baseUrl}${ServerConfig.uploads}$profileImage"
-                        : ServerConfig.defaultImage,
-                    errorWidget: (context, url, error) => Image.asset(
-                      'assets/images/default_image.png',
+                        ? "${ServerConfig.uploads}$profileImage"
+                        : ServerConfig.defaultProfileImage,
+                    errorWidget: (context, url, error) => Image.network(
+                      ServerConfig.defaultProfileImage,
                       fit: BoxFit.cover,
                     ),
                   ),

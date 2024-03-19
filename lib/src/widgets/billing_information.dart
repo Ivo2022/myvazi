@@ -22,20 +22,26 @@ class _BillingInformationState extends State<BillingInformation> {
   TextEditingController sizeController = TextEditingController();
   TextEditingController productNameController = TextEditingController();
 
-  // Declare variables at the class level
-  late String username;
+  String sizeName = '';
+  String? location;
   String? phoneNo;
+  String? town;
+
+  int quantity = 1;
+  int totalAmount = 0;
+  //int userId = MainConstants.userId;
+  int userId = userID.value;
+
+  late String username;
   late String productName;
   late int price;
   late String size;
   late int productId;
-  String sizeName = '';
-  String? location;
-  String? town;
-  int quantity = 1;
-  int totalAmount = 0;
 
-  int userId = MainConstants.userId;
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -50,23 +56,11 @@ class _BillingInformationState extends State<BillingInformation> {
   }
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    // Retrieve arguments in the build method
-    // Map<String, dynamic>? arguments =
-    //     (ModalRoute.of(context)!.settings.arguments ?? {})
-    //         as Map<String, dynamic>?;
     // Retrieve the arguments passed from the previous screen
     final Map<String, dynamic> arguments =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
 
-    // Access the selectedSize field from the arguments map
-    // final Map<String, dynamic> selectedSize =
-    //     arguments['selectedSize'] as Map<String, dynamic>;
     final Map<String, dynamic>? selectedSize =
         arguments['selectedSize'] as Map<String, dynamic>?;
 
@@ -74,18 +68,18 @@ class _BillingInformationState extends State<BillingInformation> {
     final String sizeNames = selectedSize?['name'] ?? '';
 
     // Initialize variables in the build method
-    usernameController.text = arguments?['username'] ?? '';
-    phoneController.text = arguments?['phoneNo'] ?? '';
+    usernameController.text = arguments['username'] ?? '';
+    phoneController.text = arguments['phoneNo'] ?? '';
     phoneNo = phoneController.text;
-    locationController.text = arguments?['location'] ?? '';
+    locationController.text = arguments['location'] ?? '';
     location = locationController.text;
-    townController.text = arguments?['town'] ?? '';
+    townController.text = arguments['town'] ?? '';
     town = townController.text;
-    price = arguments?['price'] ?? '';
+    price = arguments['price'] ?? '';
     // sizeController.text = arguments?['selectedSize'] ?? '';
-    productId = arguments?['productId'] ?? 0;
+    productId = arguments['productId'] ?? 0;
     sizeName = sizeNames;
-    productNameController.text = arguments?['productName'] ?? '';
+    productNameController.text = arguments['productName'] ?? '';
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
@@ -130,11 +124,9 @@ class _BillingInformationState extends State<BillingInformation> {
                   width: MediaQuery.of(context).size.width,
                   child: TextField(
                     onChanged: (value) {
-                      print(totalAmount);
-                      int newQuantity = value.isNotEmpty ? int.parse(value) : 1;
                       setState(() {
-                        quantity = newQuantity;
-                        totalAmount = (price * newQuantity);
+                        quantity = value.isNotEmpty ? int.parse(value) : 1;
+                        totalAmount = (price * quantity);
                       });
                     },
                     keyboardType: TextInputType.number,
@@ -224,7 +216,7 @@ class _BillingInformationState extends State<BillingInformation> {
                     ),
                     SizedBox(width: MediaQuery.of(context).size.width * 0.09),
                     Text(
-                      '\UGX ${NumberFormat('#,###').format(price)}',
+                      'UGX ${NumberFormat('#,###').format(price)}',
                       style: const TextStyle(
                           fontSize: 14.0, fontWeight: FontWeight.bold),
                     ),
@@ -240,9 +232,9 @@ class _BillingInformationState extends State<BillingInformation> {
                     ),
                     SizedBox(width: MediaQuery.of(context).size.width * 0.05),
                     Text(
-                      totalAmount.toString().isNotEmpty 
-                          ? '\UGX ${NumberFormat('#,###').format(totalAmount)}'
-                          : '\UGX ${NumberFormat('#,###').format(price)}',
+                      (quantity == 1)
+                          ? 'UGX ${NumberFormat('#,###').format(price)}'
+                          : 'UGX ${NumberFormat('#,###').format(totalAmount)}',
                       style: const TextStyle(
                           fontSize: 16.0, fontWeight: FontWeight.w800),
                     ),

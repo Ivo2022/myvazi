@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:myvazi/src/configs/constants.dart';
@@ -16,9 +17,13 @@ class SupplierReview extends StatefulWidget {
 class _SupplierReviewState extends State<SupplierReview> {
   List<Map<String, dynamic>> supplierComments = [];
   List<Map<String, dynamic>> supplierRatings = [];
-
-  int sellerId = MainConstants.sellerId;
+  final _postCatUrl = MainConstants.baseUrl;
+  final _postPhoneCatUrl = MainConstants.phoneUrl;
+  //int sellerId = MainConstants.sellerId;
+  int sellerId = sellerID.value;
   String ipAddress = MainConstants.ipAddress; //172.16.0.207 & 192.168.43.65
+  bool _isFirstLoadRunning = false;
+  bool _isLoading = true; // Track loading state
 
   @override
   void initState() {
@@ -29,10 +34,16 @@ class _SupplierReviewState extends State<SupplierReview> {
     sellerRatingProvider.fetchSellerRatingsData();
   }
 
-  Future<List<Map<String, dynamic>>?> fetchSupplierComments() async {
+  Future<void> fetchSupplierComments() async {
+    print("===================$sellerId++++++++++++++++++++++++");
+    if (_isFirstLoadRunning) return;
+
+    setState(() {
+      _isFirstLoadRunning = true;
+    });
     String url = Platform.isAndroid
-        ? 'http://$ipAddress/twambale/api/get_supplier_comments.php'
-        : 'http://localhost/twambale/api/get_supplier_comments.php';
+        ? '$_postPhoneCatUrl/get_supplier_comments.php'
+        : '$_postCatUrl/get_supplier_comments.php';
 
     final Map<String, dynamic> requestData = {
       'action': 'getSupplierComments',
@@ -57,17 +68,20 @@ class _SupplierReviewState extends State<SupplierReview> {
                 .cast<Map<String, dynamic>>();
 
         setState(() {
+          // _isLoading = false; // Update loading state
           supplierComments = supplierComment;
+          _isFirstLoadRunning = false;
         });
-
-        return supplierComments;
       }
     } else {
       // Handle the error
+      setState(() {
+        _isFirstLoadRunning = false;
+      });
       throw Exception('Failed to load data: ${response.statusCode}');
     }
     // Return null if there is no data available
-    return null;
+    return;
   }
 
   String formatDate(String dateString) {
@@ -80,101 +94,130 @@ class _SupplierReviewState extends State<SupplierReview> {
   @override
   Widget build(BuildContext context) {
     final sellerRatingProvider = Provider.of<SellerRatingsProvider>(context);
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (sellerRatingProvider.sellerRatings != null)
-              Column(children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(4.0, 4.0, 0.0, 4.0),
-                      child: Text((sellerRatingProvider
-                          .sellerRatings!.sellersRating
-                          .toString())),
-                    ),
-                    const SizedBox(width: 10.0),
-                    const Text(
-                      'Ratings', // Label
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ])
-            else
-              const Center(
-                child: Text("No data available"),
-              ),
-          ],
-        ),
-        const SizedBox(height: 10.0),
-        const Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Text(
-              'CUSTOMER COMMENTS', // Label
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        const Divider(),
-        const Padding(
-          padding: EdgeInsets.fromLTRB(40.0, 2.0, 16.0, 2.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Date"),
-              SizedBox(width: 135.0),
-              Text("Comments"),
-            ],
-          ),
-        ),
-        const Divider(),
-        Expanded(
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: supplierComments.length,
-            itemBuilder: (BuildContext context, int index) {
-              try {
-                return Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(40.0, 4.0, 16.0, 4.0),
-                      child: Row(
-                        children: [
-                          Text(
-                            supplierComments[index]['date_created'],
+    return _isFirstLoadRunning
+        ? buildLoadingIndicator()
+        : supplierComments.isNotEmpty &&
+                sellerRatingProvider.sellerRatings != null
+            ? Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (sellerRatingProvider.sellerRatings != null)
+                        Column(children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    4.0, 4.0, 0.0, 4.0),
+                                child: Text((sellerRatingProvider
+                                    .sellerRatings!.sellersRating
+                                    .toString())),
+                              ),
+                              const SizedBox(width: 10.0),
+                              const Text(
+                                'Ratings', // Label
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 40.0),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  supplierComments[index]['comment'] ??
-                                      'No comment available',
-                                  softWrap:
-                                      true, // This allows text to wrap to the next line
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                        ])
+                      else
+                        const Center(
+                          child: Text("Not Rated"),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 10.0),
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Text(
+                        'CUSTOMER COMMENTS', // Label
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
+                    ],
+                  ),
+                  const Divider(),
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(40.0, 2.0, 16.0, 2.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Date"),
+                        SizedBox(width: 135.0),
+                        Text("Comments"),
+                      ],
                     ),
-                  ],
-                );
-              } catch (e) {
-                // Handle the case where the index is out of range
-                return null; // or any other widget you want to display
-              }
-            },
-          ),
-        ),
-      ],
+                  ),
+                  const Divider(),
+                  Expanded(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: supplierComments.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        try {
+                          return Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    40.0, 4.0, 16.0, 4.0),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      supplierComments[index]['date_created'],
+                                    ),
+                                    const SizedBox(width: 40.0),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            supplierComments[index]
+                                                            ['comment'] !=
+                                                        null &&
+                                                    supplierComments[index]
+                                                            ['comment']
+                                                        .isNotEmpty &&
+                                                    supplierComments[index]
+                                                            ['comment'] !=
+                                                        'No comment available'
+                                                ? supplierComments[index]
+                                                    ['comment']
+                                                : 'Rated, without comment',
+                                            softWrap: true,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                        } catch (e) {
+                          // Handle the case where the index is out of range
+                          return null; // or any other widget you want to display
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              )
+            : const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Your error message widget
+                  Text('You have no reviews to display!'),
+                ],
+              );
+  }
+
+  Widget buildLoadingIndicator() {
+    return const Center(
+      child: CupertinoActivityIndicator(),
     );
   }
 }

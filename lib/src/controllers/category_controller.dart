@@ -6,7 +6,8 @@ import 'package:myvazi/src/models/category_model.dart';
 import 'package:myvazi/src/models/maincategory_model.dart';
 
 String ipAddress = MainConstants.ipAddress; //172.16.0.207 & 192.168.43.65
-int sellerId = MainConstants.sellerId;
+//int sellerId = MainConstants.sellerId;
+int sellerId = sellerID.value;
 
 class CatController {
 // Future<void> fetchCategories(dynamic mainCategory) async {

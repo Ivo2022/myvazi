@@ -1,8 +1,16 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:myvazi/src/configs/constants.dart';
 import 'package:myvazi/src/controllers/controllers.dart';
+import 'package:myvazi/src/forms/signin_form.dart';
+import 'package:myvazi/src/forms/signup_form.dart';
 import 'package:myvazi/src/providers/app_state_manager.dart';
+import 'package:myvazi/src/providers/auth_state_provider.dart';
 import 'package:myvazi/src/screens/profile.dart';
+import 'package:myvazi/src/utility/signin.dart';
+import 'package:myvazi/src/utils/auth_utils.dart';
 import 'package:myvazi/src/utils/providers.dart';
 import 'package:myvazi/src/widgets/drawer_categories.dart';
 import 'package:myvazi/src/widgets/drawer_details.dart';
@@ -27,6 +35,20 @@ class _DrawerActionsState extends State<DrawerActions> {
   int? hoverPosition;
   String tabName = '';
   int currentPage = 1;
+  final bool isLoggedIn =
+      false; // Flag to indicate whether the user is logged in
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  String localImagePath = '';
+  // String userName = '';
+  // String userPhone = '';
+  // String phoneNo = '';
+  // int? activatedId;
+  final bool _isFirstLoadRunning = false;
+  bool canLogout = true;
+  String tokenID = "";
+  bool isLoading = false;
+  Map userProfile = {};
 
   void drawerData(int categoryInt) {
     Map? drawer = ourMainCatList!
@@ -41,13 +63,6 @@ class _DrawerActionsState extends State<DrawerActions> {
     );
   }
 
-  // void drawerData(int categoryInt) {
-  //   setState(() {
-  //     drawer = ourMainCatList!.elementAt(categoryInt);
-  //     Navigator.
-  //   });
-  // }
-
   @override
   void initState() {
     super.initState();
@@ -55,311 +70,362 @@ class _DrawerActionsState extends State<DrawerActions> {
       if (homeList.value.isNotEmpty) {
         setState(() {
           ourMainCatList = homeList.value;
+          print(ourMainCatList);
           //drawerData(0); // Initialize with the first category
         });
       }
     });
-    fetchMaincategories();
+    fetchProfileInfo();
+  }
+
+  void login(BuildContext context, TextEditingController phoneController,
+      Function(String) onVerificationSuccess) async {
+    try {
+      await AuthUtil.loginUser(context, phoneController, onVerificationSuccess);
+    } catch (error) {
+      // Handle error
+    }
+  }
+
+  void onVerificationSuccess(String value) async {
+    final authProvider = Provider.of<AuthState>(context, listen: false);
+    await authProvider.login(value);
+  }
+
+  Future<Map<String, dynamic>> fetchProfileInfo() async {
+    // Call fetchUserProfile
+    Map<String, dynamic> userProfile = await UserProfileUtil.fetchUserProfile();
+
+    return userProfile;
+    // setState(() {
+    //   userName = userProfile['name'] ?? 'Unknown';
+    //   userPhone = userProfile['phone_number'] ?? 'Unknown';
+    //   activatedId = userProfile['activation'] ?? 0;
+    //   localImagePath =
+    //       userProfile['profile_image'] ?? ServerConfig.defaultProfileImage;
+    //   String location = userProfile['location'] ?? 'Unknown';
+    //   String town = userProfile['town'] ?? 'Unknown';
+    // });
+  }
+
+  Widget buildLoginButton() {
+    // This widget is shown when the user is not logged in
+    return Form(
+        //key: _formKey,
+        child: Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: SingleChildScrollView(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                  // Text widget
+                  SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.5,
+                      // ignore: unnecessary_null_comparison
+
+                      child: localImagePath.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: localImagePath.isNotEmpty
+                                  ? localImagePath
+                                  : ServerConfig.defaultImageSquare,
+                              placeholder: (context, url) =>
+                                  const CircularProgressIndicator(),
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
+                              fit: BoxFit.cover,
+                            )
+                          : Image.network(ServerConfig.defaultProfileImage)),
+                  TextField(
+                    controller: phoneController,
+                    decoration: const InputDecoration(
+                      hintText: '256...',
+                      labelText: 'Phone Number',
+                    ),
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.01,
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (usernameController.text.isNotEmpty ||
+                            phoneController.text.isNotEmpty) {
+                          // username and phone number have been provided, call a function to handle registration success
+                          //loginUser();
+                          //loginUser();
+                          login(
+                              context, phoneController, onVerificationSuccess);
+                        } else {
+                          // Code is invalid, show error message
+                          //_handleRegistrationFailure();
+                        }
+                      },
+                      child: const Text('Login'),
+                    ),
+                  ),
+                  RichText(
+                    text: TextSpan(
+                      text: "Don't have an account? ",
+                      style: DefaultTextStyle.of(context).style,
+                      children: <TextSpan>[
+                        TextSpan(
+                          text: 'Signup',
+                          style: const TextStyle(
+                            color: Colors
+                                .blue, // Change text color to blue for clickable effect
+                            decoration: TextDecoration
+                                .underline, // Add underline for clickable effect
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              // Navigate to the signup page when "Signup" is tapped
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const SignUpForm()),
+                              );
+                            },
+                        ),
+                      ],
+                    ),
+                  ),
+                ]))));
+
+    // Center(
+    //   child: ElevatedButton(
+    //     onPressed: () {
+    //       // Handle login button tap
+    //     },
+    //     child: const Text('Login'),
+    //   ),
+    // );
   }
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthState>(context, listen: false);
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
     double sizeWidth =
         screenWidth < 480 ? screenWidth * 0.1 : screenWidth * 0.04;
     final sellerProvider = Provider.of<SellerDataProvider>(context);
+    int sellerId = sellerID.value;
     return Drawer(
       elevation: 0,
-      child: ourMainCatList == null
-          ? Container()
-          : ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                SizedBox(
-                  height: 120, // Adjust as needed
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 16.0),
-                      child: Row(
+      child: !authProvider.isLoggedIn
+          ? SignInForm(
+              onVerificationSuccess: (int) {},
+            )
+          : FutureBuilder<void>(
+              future:
+                  fetchProfileInfo(), // Call your function to load data asynchronously
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  // Show loading indicator while data is loading
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  // Handle error state
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else {
+                  print(userProfile);
+                  String userName = userProfile['name'] ?? 'Unknown';
+                  String userPhone = userProfile['phone_number'] ?? 'Unknown';
+                  int activatedId = userProfile['activation'] ?? 0;
+                  localImagePath = userProfile['profile_image'] ??
+                      ServerConfig.defaultProfileImage;
+                  // Once data is loaded, display both ListViews
+                  return Stack(
+                    children: [
+                      ListView(
+                        padding: EdgeInsets.zero,
                         children: [
-                          CircleAvatar(
-                            radius: sizeWidth,
-                            backgroundImage: const AssetImage(
-                                'assets/images/default_image.png'),
-                          ),
-                          const SizedBox(width: 10.0),
-                          sellerProvider.sellers != null
-                              ? Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                          SizedBox(
+                            height: 120, // Adjust as needed
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 16.0),
+                                child: Row(
                                   children: [
-                                    Text(sellerProvider.sellers!.userName),
-                                    Text(sellerProvider.sellers!.userPhone),
+                                    CircleAvatar(
+                                      radius: sizeWidth,
+                                      backgroundImage: NetworkImage(
+                                        ServerConfig.defaultProfileImage,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10.0),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(userName),
+                                        Text(userPhone),
+                                      ],
+                                    ),
                                   ],
-                                )
-                              : const Center(
-                                  child: Text("No Users"),
                                 ),
+                              ),
+                            ),
+                          ),
+                          if (activatedId != 0)
+                            Column(
+                              children: [
+                                const Divider(),
+                                const Center(
+                                  child: Text(
+                                    'Your Transactions',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                const Divider(),
+                                ListTile(
+                                  leading: const Icon(Icons.shopping_bag),
+                                  title: const Text('Purchases'),
+                                  onTap: () {
+                                    Navigator.pop(context); // Close the drawer
+                                  },
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.monetization_on),
+                                  title: const Text('Sales'),
+                                  onTap: () {
+                                    Navigator.pop(context); // Close the drawer
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const DrawerSales(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
                         ],
                       ),
-                    ),
-                  ),
-                ),
-                const Divider(),
-                const Center(
-                  child: Text(
-                    'By Specific Categories',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.list_alt),
-                  title: const Text('Categories'),
-                  onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const DrawerCategories()),
-                    );
-                  },
-                ),
-                const Divider(),
-                // const Center(
-                //   child: Text(
-                //     'By People',
-                //     style: TextStyle(fontWeight: FontWeight.bold),
-                //   ),
-                // ),
-                // const Divider(),
-                // ...ourMainCatList!.map((drawer) {
-                //   String drawerName = drawer.values.elementAt(0);
-                //   tabName = capitalizeFirstLetter(drawerName.toLowerCase());
-                //   int index = ourMainCatList!.indexOf(drawer);
-                //   return Container(
-                //     height: 27.0,
-                //     child: Material(
-                //       color: index == hoverPosition
-                //           ? Colors.grey[200]
-                //           : Colors.transparent,
-                //       child: InkWell(
-                //         onTap: () {
-                //           setState(() {
-                //             positionedTab = index;
-                //           });
-                //           drawerData(index);
-                //         },
-                //         child: ListTile(
-                //           title: Padding(
-                //             padding: const EdgeInsets.only(left: 16.0),
-                //             child: Column(
-                //               crossAxisAlignment: CrossAxisAlignment.start,
-                //               //mainAxisAlignment: MainAxisAlignment.center,
-                //               children: [
-                //                 Text(
-                //                   tabName,
-                //                   style: const TextStyle(fontSize: 13.0),
-                //                 ),
-                //               ],
-                //             ),
-                //           ),
-                //         ),
-                //       ),
-                //     ),
-                //   );
-                // }),
-                const Center(
-                  child: Text(
-                    'Your Transactions',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.shopping_bag),
-                  title: const Text('Purchases'),
-                  onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const DrawerPurchases()),
-                    );
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.monetization_on),
-                  title: const Text('Sales'),
-                  onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const DrawerSales()),
-                    );
-                  },
-                ),
-              ],
+                      if (_isFirstLoadRunning) // Display loading indicator if data is loading
+                        Container(
+                          color: Colors.black.withOpacity(
+                              0.1), // Semi-transparent black background
+                          child: const Center(
+                            child:
+                                CupertinoActivityIndicator(), // Loading indicator widget
+                          ),
+                        ),
+                    ],
+                  );
+                }
+              },
             ),
     );
 
-    // return Drawer(
+    // Drawer(
     //   elevation: 0,
-    //   child: ourMainCatList == null
-    //       ? Container()
-    //       : Column(
-    //           mainAxisAlignment: MainAxisAlignment.center,
-    //           children: [
-    //             Padding(
-    //               padding: const EdgeInsets.only(left: 33.0, top: 40.0),
-    //               child: Row(
-    //                 children: [
-    //                   CircleAvatar(
-    //                       radius: sizeWidth,
-    //                       backgroundImage: const AssetImage(
-    //                           'assets/images/default_image.png')),
-    //                   const SizedBox(width: 10.0),
-    //                   if (sellerProvider.sellers != null)
-    //                     Column(
-    //                       mainAxisAlignment: MainAxisAlignment.center,
-    //                       children: [
-    //                         Padding(
-    //                           padding:
-    //                               EdgeInsets.only(left: screenWidth * 0.03),
-    //                           child: Row(
-    //                             children: [
-    //                               Text(sellerProvider.sellers!.userName),
-    //                             ],
-    //                           ),
-    //                         ),
-    //                         Padding(
-    //                           padding:
-    //                               EdgeInsets.only(left: screenWidth * 0.04),
-    //                           child: Row(
-    //                             children: [
-    //                               Text(sellerProvider.sellers!.userPhone),
-    //                             ],
-    //                           ),
-    //                         ),
-    //                       ],
-    //                     )
-    //                   else
-    //                     const Center(
-    //                       child: Text("No Users"),
-    //                     ),
-    //                 ],
-    //               ),
-    //             ),
-    //             const Divider(),
-    //             const Padding(
-    //               padding: EdgeInsets.only(left: 16.0),
-    //               child: Text(
-    //                 'By Specific Categories',
-    //                 style: TextStyle(fontWeight: FontWeight.bold),
-    //               ),
-    //             ),
-    //             const Divider(),
-    //             ListTile(
-    //               leading: const Icon(Icons.list_alt),
-    //               title: const Text('Categories'),
-    //               onTap: () {
-    //                 Navigator.pop(context); // Close the drawer
-    //                 Navigator.push(
-    //                   context,
-    //                   MaterialPageRoute(
-    //                       builder: (context) => const DrawerCategories()),
-    //                 );
-    //               },
-    //             ),
-    //             const Divider(),
-    //             const Padding(
-    //               padding: EdgeInsets.only(left: 16.0),
-    //               child: Text(
-    //                 'By People',
-    //                 style: TextStyle(fontWeight: FontWeight.bold),
-    //               ),
-    //             ),
-    // const Divider(),
-    // ...ourMainCatList!.map((drawer) {
-    //   String drawerName = drawer.values.elementAt(0);
-    //   tabName = capitalizeFirstLetter(drawerName.toLowerCase());
-    //   int index = ourMainCatList!.indexOf(drawer);
-    //   return Container(
-    //     height: 27.0,
-    //     child: Material(
-    //       color: index == hoverPosition
-    //           ? Colors.grey[200]
-    //           : Colors.transparent,
-    //       child: InkWell(
-    //         onTap: () {
-    //           setState(() {
-    //             positionedTab = index;
-    //           });
-    //           drawerData(index);
-    //         },
-    //         child: ListTile(
-    //           title: Padding(
-    //             padding: const EdgeInsets.only(left: 16.0),
-    //             child: Column(
-    //               crossAxisAlignment: CrossAxisAlignment.start,
-    //               //mainAxisAlignment: MainAxisAlignment.center,
+    //   child: !authProvider.isLoggedIn
+    //       ? SignInForm(
+    //           onVerificationSuccess: (int) {},
+    //         )
+    //       //buildLoginButton()
+    //       : activatedId == 0
+    //           ? ListView(
     //               children: [
-    //                 Text(
-    //                   tabName,
-    //                   style: const TextStyle(fontSize: 13.0),
+    //                 SizedBox(
+    //                   height: 120, // Adjust as needed
+    //                   child: Align(
+    //                     alignment: Alignment.centerLeft,
+    //                     child: Padding(
+    //                       padding: const EdgeInsets.only(left: 16.0),
+    //                       child: Row(
+    //                         children: [
+    //                           CircleAvatar(
+    //                             radius:
+    //                                 sizeWidth, // Default radius for larger screens
+    //                             backgroundImage: NetworkImage(
+    //                                 ServerConfig.defaultProfileImage),
+    //                           ),
+    //                           const SizedBox(width: 10.0),
+    //                           Column(
+    //                             crossAxisAlignment: CrossAxisAlignment.start,
+    //                             mainAxisAlignment: MainAxisAlignment.center,
+    //                             children: [
+    //                               Text(userName),
+    //                               Text(userPhone),
+    //                             ],
+    //                           )
+    //                         ],
+    //                       ),
+    //                     ),
+    //                   ),
+    //                 ),
+    //               ],
+    //             )
+    //           : ListView(
+    //               padding: EdgeInsets.zero,
+    //               children: [
+    //                 Visibility(
+    //                   visible: sellerId != null,
+    //                   child: SizedBox(
+    //                     height: 120, // Adjust as needed
+    //                     child: Align(
+    //                       alignment: Alignment.centerLeft,
+    //                       child: Padding(
+    //                         padding: const EdgeInsets.only(left: 16.0),
+    //                         child: Row(
+    //                           children: [
+    //                             CircleAvatar(
+    //                               radius:
+    //                                   sizeWidth, // Default radius for larger screens
+    //                               backgroundImage: NetworkImage(
+    //                                   ServerConfig.defaultProfileImage),
+    //                             ),
+    //                             const SizedBox(width: 10.0),
+    //                             Column(
+    //                               crossAxisAlignment: CrossAxisAlignment.start,
+    //                               mainAxisAlignment: MainAxisAlignment.center,
+    //                               children: [
+    //                                 Text(userName),
+    //                                 Text(userPhone),
+    //                               ],
+    //                             )
+    //                           ],
+    //                         ),
+    //                       ),
+    //                     ),
+    //                   ),
+    //                 ),
+    //                 const Divider(),
+    //                 const Center(
+    //                   child: Text(
+    //                     'Your Transactions',
+    //                     style: TextStyle(fontWeight: FontWeight.bold),
+    //                   ),
+    //                 ),
+    //                 const Divider(),
+    //                 ListTile(
+    //                   leading: const Icon(Icons.shopping_bag),
+    //                   title: const Text('Purchases'),
+    //                   onTap: () {
+    //                     Navigator.pop(context); // Close the drawer
+    //                   },
+    //                 ),
+    //                 ListTile(
+    //                   leading: const Icon(Icons.monetization_on),
+    //                   title: const Text('Sales'),
+    //                   onTap: () {
+    //                     Navigator.pop(context); // Close the drawer
+    //                     Navigator.push(
+    //                       context,
+    //                       MaterialPageRoute(
+    //                           builder: (context) => const DrawerSales()),
+    //                     );
+    //                   },
     //                 ),
     //               ],
     //             ),
-    //           ),
-    //         ),
-    //       ),
-    //     ),
-    //   );
-    // }),
-    //             const Divider(),
-    //             const Padding(
-    //               padding: EdgeInsets.only(left: 16.0),
-    //               child: Text(
-    //                 'Your Transactions',
-    //                 style: TextStyle(fontWeight: FontWeight.bold),
-    //               ),
-    //             ),
-    //             const Divider(),
-    //             ListTile(
-    //               leading: const Icon(Icons.shopping_bag),
-    //               title: const Text('Purchases'),
-    //               onTap: () {
-    //                 Navigator.pop(context); // Close the drawer
-    //                 Navigator.push(
-    //                   context,
-    //                   MaterialPageRoute(
-    //                       builder: (context) => const DrawerPurchases()),
-    //                 );
-    //               },
-    //             ),
-    //             ListTile(
-    //               /* leading: const FaIcon(
-    //           FontAwesomeIcons.dollarSign,
-    //           size: 50.0,
-    //           color: Colors.green, // Customize the color if needed
-    //         ),
-    //          */
-    //               leading: const Icon(Icons.monetization_on),
-    //               title: const Text('Sales'),
-    //               onTap: () {
-    //                 Navigator.pop(context); // Close the drawer
-    //                 Navigator.push(
-    //                   context,
-    //                   MaterialPageRoute(
-    //                       builder: (context) => const DrawerSales()),
-    //                 );
-    //               },
-    //             ),
-    //           ],
-    //         ),
     // );
   }
 

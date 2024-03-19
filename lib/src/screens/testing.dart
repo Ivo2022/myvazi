@@ -36,7 +36,7 @@ class _ProductViewState extends State<Testing> {
     super.initState();
     final sellerProvider =
         Provider.of<SellerDataProvider>(context, listen: false);
-    sellerProvider.fetchSellersData();
+    //sellerProvider.fetchSellersData();
     final usersProvider = Provider.of<UserDataProvider>(context, listen: false);
     usersProvider.fetchUsersData();
     fetchSizesAndSetData();

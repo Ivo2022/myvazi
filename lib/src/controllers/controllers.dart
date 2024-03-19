@@ -13,17 +13,23 @@ import 'dart:io';
 import 'package:myvazi/src/utils/response_message.dart';
 
 String ipAddress = MainConstants.ipAddress; //172.16.0.207 & 192.168.43.65
-int sellerId = MainConstants.sellerId;
-int userid = MainConstants.userId;
+//int sellerId = MainConstants.sellerId;
+//int userid = MainConstants.userId;
+
+int sellerId = sellerID.value;
+int userid = userID.value;
+
 int activation = MainConstants.activation;
 List<Map<String, dynamic>> sizesData = [];
 String _action = "getAllMainCategoriesWithProducts";
+String _postCatUrl = MainConstants.baseUrl;
+String _postPhoneCatUrl = MainConstants.phoneUrl;
 
 class SizesService {
   static Future<List<Map<String, dynamic>>> fetchAllSizes() async {
     String url = Platform.isAndroid
-        ? 'http://$ipAddress/twambale/api/get_all_sizes.php'
-        : 'http://localhost/twambale/api/get_all_sizes.php';
+        ? '$_postPhoneCatUrl/get_all_sizes.php'
+        : '$_postCatUrl/get_all_sizes.php';
 
     final Map<String, dynamic> requestData = {
       'action': 'getAllSizes',
@@ -60,8 +66,8 @@ class SizesService {
 
 Future<SellersModel?> fetchSellers() async {
   String url = Platform.isAndroid
-      ? 'http://$ipAddress/twambale/api/get_user_data.php'
-      : 'http://localhost/twambale/api/get_user_data.php';
+      ? '$_postPhoneCatUrl/get_user_data.php'
+      : '$_postCatUrl/get_user_data.php';
 
   final Map<String, dynamic> requestData = {
     'action': 'getUserInfo',
@@ -89,8 +95,8 @@ Future<SellersModel?> fetchSellers() async {
 
 Future<UsersModel?> fetchAllUsers() async {
   String url = Platform.isAndroid
-      ? 'http://$ipAddress/twambale/api/get_user_data.php'
-      : 'http://localhost/twambale/api/get_user_data.php';
+      ? '$_postPhoneCatUrl/get_user_data.php'
+      : '$_postCatUrl/get_user_data.php';
 
   final Map<String, dynamic> requestData = {
     'action': 'getAllUserInfo',
@@ -106,7 +112,6 @@ Future<UsersModel?> fetchAllUsers() async {
     },
     body: jsonEncode(requestData),
   );
-  //print(response.body);
   if (response.statusCode == 200) {
     final Map<String, dynamic> data = json.decode(response.body);
     return UsersModel.fromJson(data);
@@ -117,8 +122,8 @@ Future<UsersModel?> fetchAllUsers() async {
 
 Future<SellerRatingsModel?> fetchSupplierRatings() async {
   String url = Platform.isAndroid
-      ? 'http://$ipAddress/twambale/api/get_supplier_ratings.php'
-      : 'http://localhost/twambale/api/get_supplier_ratings.php';
+      ? '$_postPhoneCatUrl/get_supplier_ratings.php'
+      : '$_postCatUrl/get_supplier_ratings.php';
 
   final Map<String, dynamic> requestData = {
     'action': 'getSupplierRatings',
@@ -144,8 +149,8 @@ Future<SellerRatingsModel?> fetchSupplierRatings() async {
 
 Future<List<Product>?> parseSubcategories() async {
   String url = Platform.isAndroid
-      ? 'http://$ipAddress/twambale/api/get_sellers_subcategories.php'
-      : 'http://localhost/twambale/api/get_sellers_subcategories.php';
+      ? '$_postPhoneCatUrl/get_sellers_subcategories.php'
+      : '$_postCatUrl/get_sellers_subcategories.php';
 
   final Map<String, dynamic> requestData = {
     'action': 'getSellerSubCats',
@@ -175,13 +180,11 @@ Future<List<Product>?> parseSubcategories() async {
 Future<List?> fetchMaincategories() async {
   try {
     String url = Platform.isAndroid
-        ? 'http://$ipAddress/twambale/api/get_maincategories_with_products.php?action=$_action'
-        : 'http://localhost/twambale/api/get_maincategories_with_products.php?action=$_action';
-
+        ? '$_postPhoneCatUrl/get_maincategories_with_products.php?action=$_action'
+        : '$_postCatUrl/get_maincategories_with_products.php?action=$_action';
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       List<dynamic> rawData = json.decode(response.body);
-
       // Assuming homeList is a ValueNotifier or similar, update its value
       homeList.value = rawData;
     } else {
@@ -196,8 +199,8 @@ Future<List?> fetchMaincategories() async {
 
 Future<List<dynamic>> fetchAllSizes() async {
   String url = Platform.isAndroid
-      ? 'http://$ipAddress/twambale/api/get_all_sizes.php'
-      : 'http://localhost/twambale/api/get_all_sizes.php';
+      ? '$_postPhoneCatUrl/get_all_sizes.php'
+      : '$_postCatUrl/get_all_sizes.php';
 
   final Map<String, dynamic> requestData = {
     'action': 'getAllSizes',
@@ -234,8 +237,8 @@ Future<List<dynamic>> fetchAllSizes() async {
 Future<List?> fetchCategories() async {
   try {
     String url = Platform.isAndroid
-        ? 'http://$ipAddress/twambale/api/get_maincategories_with_categories_products.php'
-        : 'http://localhost/twambale/api/get_maincategories_with_categories_products.php';
+        ? '$_postPhoneCatUrl/get_maincategories_with_categories_products.php'
+        : '$_postCatUrl/get_maincategories_with_categories_products.php';
 
     final Map<String, dynamic> requestData = {
       'action': 'getCategoriesWithProductsByID',
@@ -268,8 +271,8 @@ Future<List?> fetchCategories() async {
 Future<List?> fetchAllMaincategories() async {
   try {
     String url = Platform.isAndroid
-        ? 'http://$ipAddress/twambale/api/get_maincategories_with_products.php'
-        : 'http://localhost/twambale/api/get_maincategories_with_products.php';
+        ? '$_postPhoneCatUrl/get_maincategories_with_products.php'
+        : '$_postCatUrl/get_maincategories_with_products.php';
 
     final Map<String, dynamic> requestData = {
       'action': 'getAllMainCategories',
@@ -302,8 +305,8 @@ Future<List?> fetchAllMaincategories() async {
 Future<List?> fetchMainSubcategories() async {
   try {
     String url = Platform.isAndroid
-        ? 'http://$ipAddress/twambale/api/post_product_details.php'
-        : 'http://localhost/twambale/api/post_product_details.php';
+        ? '$_postPhoneCatUrl/post_product_details.php'
+        : '$_postCatUrl/post_product_details.php';
 
     final Map<String, dynamic> requestData = {
       'action': 'getMainSubCategories',
@@ -322,7 +325,6 @@ Future<List?> fetchMainSubcategories() async {
       List<dynamic> rawData = json.decode(response.body);
 
       uploadList.value = rawData;
-      // print(homeList.value);
     } else {
       throw Exception('Failed to load subcategories');
     }
@@ -335,10 +337,11 @@ Future<List?> fetchMainSubcategories() async {
 
 Future<void> uploadImage(context, File imageFile) async {
   String url = Platform.isAndroid
-      ? 'http://$ipAddress/twambale/api/upload.php'
-      : 'http://localhost/twambale/api/upload.php';
+      ? '$_postPhoneCatUrl/upload.php'
+      : '$_postCatUrl/upload.php';
   var request = http.MultipartRequest(
-    'POST', Uri.parse(url), // Change to your PHP script URL
+    'POST',
+    Uri.parse(url),
   );
 
   request.files.add(await http.MultipartFile.fromPath('file', imageFile.path));
@@ -358,8 +361,8 @@ Future<void> uploadImage(context, File imageFile) async {
 Future<void> pushDataToAPI(context, Products product,
     {bool sendFiles = true}) async {
   String url = Platform.isAndroid
-      ? 'http://$ipAddress/twambale/api/uploads.php'
-      : 'http://localhost/twambale/api/uploads.php';
+      ? '$_postPhoneCatUrl/uploads.php'
+      : '$_postCatUrl/uploads.php';
   var apiUrl = Uri.parse(url);
 
   if (sendFiles) {
@@ -401,8 +404,8 @@ Future<void> pushDataToAPI(context, Products product,
 //     int activation,
 //     {bool sendFiles = true}) async {
 //   String url = Platform.isAndroid
-//       ? 'http://$ipAddress/twambale/api/uploads.php'
-//       : 'http://localhost/twambale/api/uploads.php';
+//       ? '$_postPhoneCatUrl/uploads.php'
+//       : '$_postCatUrl/uploads.php';
 //   var apiUrl = Uri.parse(url);
 
 //   if (sendFiles) {
@@ -506,21 +509,24 @@ Future<void> sendOtherData(
     if (response.statusCode == 200) {
       // Show a SnackBar indicating success
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Product created successfully')),
+        const SnackBar(
+          content: Text('Product created successfully'),
+          backgroundColor: Colors.green,
+        ),
       );
-      Navigator.popUntil(context, ModalRoute.withName('/'));
-
-      // Navigator.pushReplacement(
+      //Navigator.popUntil(context, ModalRoute.withName('/home'));
+      // Navigate to the homepage
+      // Navigator.push(
       //   context,
-      //   MaterialPageRoute(
-      //       builder: (context) =>
-      //           const Routes()), // Replace with your next screen
+      //   MaterialPageRoute(builder: (context) => Routing()),
       // );
     } else {
       // Show a SnackBar indicating failure
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('Failed to create product: ${response.statusCode}')),
+          content: Text('Failed to create product: ${response.statusCode}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   } catch (error) {
@@ -544,10 +550,8 @@ Future<void> submitBillInfoToAPI(
     int quantity,
     int totalAmount) async {
   String url = Platform.isAndroid
-      ? 'http://$ipAddress/twambale/api/post_order_details.php'
-      : 'http://localhost/twambale/api/post_order_details.php';
-
-  // Replace 'YOUR_API_ENDPOINT' with the actual URL of your API endpoint
+      ? '$_postPhoneCatUrl/post_order_details.php'
+      : '$_postCatUrl/post_order_details.php';
   var apiUrl = Uri.parse(url);
 
   // Prepare the data to be sent in the request body
@@ -574,4 +578,34 @@ Future<void> submitBillInfoToAPI(
     // Something went wrong
     print('Failed to submit data. Status code: ${response.statusCode}');
   }
+}
+
+Future<String> userLogin() async {
+  String url = Platform.isAndroid
+      ? '$_postPhoneCatUrl/user_profile_data.php'
+      : '$_postCatUrl/user_profile_data.php';
+
+  final Map<String, dynamic> requestData = {
+    'action': 'userContentAction',
+    'phoneNo': sellerId,
+  };
+
+  final response = await http.post(
+    Uri.parse(url),
+    headers: {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Accept': "*/*",
+      'connection': 'keep-alive',
+    },
+    body: jsonEncode(requestData),
+  );
+  if (response.body.isEmpty) {
+    print('Server response is empty or null.');
+    return '';
+  } else {
+    // Parse the JSON string into a Map<String, dynamic>
+    Map<String, dynamic> jsonMap = json.decode(response.body);
+    storeMap.value = jsonMap;
+  }
+  return '';
 }

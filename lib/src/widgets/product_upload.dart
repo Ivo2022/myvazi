@@ -86,28 +86,27 @@ class _ProductUploadState extends State<ProductUpload> {
       for (int i = 0; i < mainCategoriesList.length; i++) {
         Map mainCatdetails = mainCategoriesList.elementAt(i);
         String maincat = mainCatdetails.values.last;
-        int maincatID = mainCatdetails.values.first;
+        int maincatID = int.parse(mainCatdetails.values.first);
         setState(() {
           mainCategories.add({'name': maincat, 'id': maincatID});
         });
       }
     } else {
-      throw Exception('Failed to load main categories');
+      throw Exception(
+          'Failed to load main categories: ${response.body} = HTTP Status Code: ${response.statusCode}');
     }
   }
 
 // This function returns the categories that show while uploading products
   Future<void> fetchCategories(dynamic mainCategory) async {
     String url = Platform.isAndroid
-        ? 'http://$ipAddress/twambale/api/get_categories.php'
-        : 'http://localhost/twambale/api/get_categories.php';
-
+        ? '$_postPhoneCatUrl/get_categories.php'
+        : '$_postCatUrl/get_categories.php';
     final Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
       'Accept': 'application/json',
       // Add any additional headers if needed
     };
-    //print("====>>>>> $mainCategory <<<=====");
     final Map<String, dynamic> requestData = {
       'action': 'getAllCategories',
       'maincat': mainCategory
@@ -128,7 +127,7 @@ class _ProductUploadState extends State<ProductUpload> {
           for (int i = 0; i < categoriesList.length; i++) {
             Map catDetails = categoriesList.elementAt(i);
             String cat = catDetails.values.first;
-            int catID = catDetails.values.last;
+            int catID = int.parse(catDetails.values.last);
             setState(() {
               categories.add({'name': cat, 'id': catID});
             });
@@ -138,18 +137,13 @@ class _ProductUploadState extends State<ProductUpload> {
           setState(() {
             categories.add(decodedResponse);
           });
-          //print(categories);
         } else {
           // Handle other types if necessary
           print('Unexpected response type: ${decodedResponse.runtimeType}');
         }
       } else {
-        print(
-            'Failed to load main categories. HTTP Status Code: ${response.statusCode}');
-        print('Error Response: ${response.body}');
-        // You might want to handle this error more gracefully, depending on your use case.
-        // For now, we throw an exception.
-        throw Exception('Failed to load main categories');
+        throw Exception(
+            'Failed to load categories: ${response.body} = HTTP Status Code: ${response.statusCode}');
       }
     } catch (e) {
       print('Exception: $e');
@@ -159,17 +153,14 @@ class _ProductUploadState extends State<ProductUpload> {
 
 // This function returns the subcategories that show while uploading products
   Future<void> fetchSubCategories(dynamic category) async {
-    print("********* $category");
     String url = Platform.isAndroid
-        ? 'http://$ipAddress/twambale/api/get_subcategories_with_products.php'
-        : 'http://localhost/twambale/api/get_subcategories_with_products.php';
+        ? '$_postPhoneCatUrl/get_subcategories_with_products.php'
+        : '$_postCatUrl/get_subcategories_with_products.php';
 
     final Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
       'Accept': 'application/json',
-      // Add any additional headers if needed
     };
-    //print("====>>>>> $category <<<<<<<<<<<<<=====");
 
     final Map<String, dynamic> requestData = {
       'action': 'getAllSubCategories',
@@ -191,7 +182,7 @@ class _ProductUploadState extends State<ProductUpload> {
           for (int i = 0; i < subcategoriesList.length; i++) {
             Map subCatDetails = subcategoriesList.elementAt(i);
             String subcat = subCatDetails.values.first;
-            int subcatID = subCatDetails.values.last;
+            int subcatID = int.parse(subCatDetails.values.last);
 
             setState(() {
               subCategories.add({'name': subcat, 'subcategory_id': subcatID});
@@ -207,12 +198,10 @@ class _ProductUploadState extends State<ProductUpload> {
           print('Unexpected response type: ${decodedResponse.runtimeType}');
         }
       } else {
-        print(
-            'Failed to load main categories. HTTP Status Code: ${response.statusCode}');
-        print('Error Response: ${response.body}');
         // You might want to handle this error more gracefully, depending on your use case.
         // For now, we throw an exception.
-        throw Exception('Failed to load main categories');
+        throw Exception(
+            'Failed to load subcategories: ${response.body} = HTTP Status Code: ${response.statusCode}');
       }
     } catch (e) {
       print('Exception: $e');
@@ -235,9 +224,8 @@ class _ProductUploadState extends State<ProductUpload> {
   // This function returns the sizes that show while uploading products
   fetchSizesForProducts() async {
     String url = Platform.isAndroid
-        ? 'http://$ipAddress/twambale/api/get_all_sizes.php'
-        : 'http://localhost/twambale/api/get_all_sizes.php';
-
+        ? '$_postPhoneCatUrl/get_all_sizes.php'
+        : '$_postCatUrl/get_all_sizes.php';
     final Map<String, dynamic> requestData = {
       'action': 'getAllSizes',
     };
@@ -251,12 +239,13 @@ class _ProductUploadState extends State<ProductUpload> {
       },
       body: jsonEncode(requestData),
     );
+
     if (response.statusCode == 200) {
       List sizesList = json.decode(response.body);
       for (int i = 0; i < sizesList.length; i++) {
         Map sizedetails = sizesList.elementAt(i);
         String size = sizedetails.values.last;
-        int sizeID = sizedetails.values.first;
+        int sizeID = int.parse(sizedetails.values.first);
         sizes.add({'name': size, 'size_id': sizeID});
       }
 
@@ -591,9 +580,6 @@ class _ProductUploadState extends State<ProductUpload> {
                   });
 
                   print('Picked MainCat IDs: $pickedMainCats');
-                  // print(selectedMainCategories);
-
-                  // print(jsonEncode(selectedCategories));
                   // Call the API with the selected categories list
                   fetchCategories(jsonEncode(selectedCategories));
 
@@ -622,7 +608,7 @@ class _ProductUploadState extends State<ProductUpload> {
               'Select the category of product',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            content: Container(
+            content: SizedBox(
               width: double.maxFinite,
               child: ListView(
                 shrinkWrap: true,
@@ -633,7 +619,6 @@ class _ProductUploadState extends State<ProductUpload> {
                       value: selectedCategories[index],
                       onChanged: (bool? value) {
                         if (value != null) {
-                          // print(categories[index]['name']);
                           setState(() {
                             selectedCategories[index] = value;
                           });
@@ -655,7 +640,6 @@ class _ProductUploadState extends State<ProductUpload> {
                 onPressed: () {
                   // Get the selected main categories
                   for (int i = 0; i < categories.length; i++) {
-                    // print(categories);
                     if (selectedCategories[i]) {
                       selectedSubCategories.add({
                         'name': categories[i]['name'],
@@ -731,7 +715,8 @@ class _ProductUploadState extends State<ProductUpload> {
       builder: (BuildContext context) {
         List<bool> selectedSubCategories =
             List.generate(subCategories.length, (index) => false);
-        return StatefulBuilder(builder: (context, setState) {
+        return StatefulBuilder(
+          builder: (context, setState) {
           return AlertDialog(
             title: const Text(
               'Select the subcategory of products',

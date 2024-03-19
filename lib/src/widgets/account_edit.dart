@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:myvazi/src/configs/constants.dart';
 
 //import 'package:myvazi/models/data.dart';
 
@@ -58,9 +60,7 @@ class _AccountEditState extends State<AccountEdit> {
       appBar: AppBar(
         actions: [
           GestureDetector(
-            onTap: () {
-              
-            },
+            onTap: () {},
             child: const Padding(
               padding: EdgeInsets.all(8.0),
               child: Text("UPDATE"),
@@ -81,11 +81,21 @@ class _AccountEditState extends State<AccountEdit> {
               children: <Widget>[
                 // Text widget
                 SizedBox(
+                  // Image.asset(selectedImage)
                   height: MediaQuery.of(context).size.height * 0.5,
                   // ignore: unnecessary_null_comparison
                   child: selectedImage != null
-                      ? Image.asset(selectedImage)
-                      : Image.asset(defaultImage),
+                      ? CachedNetworkImage(
+                          imageUrl: selectedImage.isNotEmpty
+                              ? selectedImage
+                              : ServerConfig.defaultImageSquare,
+                          placeholder: (context, url) =>
+                              const CircularProgressIndicator(),
+                          errorWidget: (context, url, error) =>
+                              const Icon(Icons.error),
+                          fit: BoxFit.cover,
+                        )
+                      : Image.network(ServerConfig.defaultProfileImage),
                 ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.01,

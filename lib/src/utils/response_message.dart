@@ -16,12 +16,12 @@ class DialogUtils {
               child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          const Routing()), // Replace with your next screen
-                );
+                // Navigator.pushReplacement(
+                //   context,
+                //   MaterialPageRoute(
+                //       builder: (context) =>
+                //           Routing()), // Replace with your next screen
+                // );
               },
             ),
           ],

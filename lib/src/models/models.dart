@@ -21,8 +21,16 @@ String sellersToJson(SellersModel data) => json.encode(data.toJson());
 class SellersModel {
   String userName;
   String userPhone;
+  // String userImage;
+  // DateTime signupDate;
+
 //
-  SellersModel({required this.userName, required this.userPhone});
+  SellersModel({
+    required this.userName,
+    required this.userPhone,
+    // required this.userImage,
+    // required this.signupDate
+  });
 
   factory SellersModel.fromJson(Map<String, dynamic> json) {
     return SellersModel(
@@ -30,6 +38,10 @@ class SellersModel {
           json['name'] as String, // Provide a default value if 'name' is null
       userPhone: json['phone_number']
           as String, // Provide a default value if 'phone_number' is null
+      // userImage: json['profile_image']
+      //     as String, // Provide a default value if 'phone_number' is null
+      // signupDate: json['signup_date']
+      //     as DateTime, // Provide a default value if 'phone_number' is null
     );
   }
 
@@ -37,6 +49,8 @@ class SellersModel {
     return {
       'name': userName,
       'phone_number': userPhone,
+      // 'profile_image': userImage,
+      // 'signup_date  ': signupDate,
     };
   }
 }

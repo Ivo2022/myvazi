@@ -22,9 +22,11 @@ class _RevenueState extends State<Revenue> {
   String totalRevenue = "";
   Map<String, dynamic> currentMonthOrders = {};
   String totalPayments = "";
-  int sellerId = MainConstants.sellerId;
+  //int sellerId = MainConstants.sellerId;
+  int sellerId = sellerID.value;
   String ipAddress = MainConstants.ipAddress; //172.16.0.207 & 192.168.43.65
-
+  final _postCatUrl = MainConstants.baseUrl;
+  final _postPhoneCatUrl = MainConstants.phoneUrl;
   int deliveredStatus = 1;
   final double itemHeight = 36.0; // Adjust this value accordingly
 
@@ -38,13 +40,13 @@ class _RevenueState extends State<Revenue> {
     fetchsellerPayments();
     final sellerProvider =
         Provider.of<SellerDataProvider>(context, listen: false);
-    sellerProvider.fetchSellersData();
+    //sellerProvider.fetchSellersData();
   }
 
   fetchMonthlyOrders() async {
     String url = Platform.isAndroid
-        ? 'http://$ipAddress/twambale/api/get_monthly_orders.php'
-        : 'http://localhost/twambale/api/get_monthly_orders.php';
+        ? '$_postPhoneCatUrl/get_monthly_orders.php'
+        : '$_postCatUrl/get_monthly_orders.php';
 
     final Map<String, dynamic> requestData = {
       'action': 'getMonthlyOrders',
@@ -80,9 +82,8 @@ class _RevenueState extends State<Revenue> {
 
   fetchYearlyOrders() async {
     String url = Platform.isAndroid
-        ? 'http://$ipAddress/twambale/api/get_yearly_orders.php'
-        : 'http://localhost/twambale/api/get_yearly_orders.php';
-
+        ? '$_postPhoneCatUrl/get_yearly_orders.php'
+        : '$_postCatUrl/get_yearly_orders.php';
     final Map<String, dynamic> requestData = {
       'action': 'getYearlyOrders',
       'seller_id': sellerId,
@@ -119,8 +120,8 @@ class _RevenueState extends State<Revenue> {
 
   fetchTotalRevenue() async {
     String url = Platform.isAndroid
-        ? 'http://$ipAddress/twambale/api/get_total_orders.php'
-        : 'http://localhost/twambale/api/get_total_orders.php';
+        ? '$_postPhoneCatUrl/get_total_orders.php'
+        : '$_postCatUrl/get_total_orders.php';
 
     final Map<String, dynamic> requestData = {
       'action': 'getTotalRevenue',
@@ -159,9 +160,8 @@ class _RevenueState extends State<Revenue> {
 
   fetchCurrMonthOrders() async {
     String url = Platform.isAndroid
-        ? 'http://$ipAddress/twambale/api/get_current_orders.php'
-        : 'http://localhost/twambale/api/get_current_orders.php';
-
+        ? '$_postPhoneCatUrl/api/get_current_orders.php'
+        : '$_postCatUrl/get_current_orders.php';
     final Map<String, dynamic> requestData = {
       'action': 'getCurrentOrders',
       'seller_id': sellerId,
@@ -219,9 +219,8 @@ class _RevenueState extends State<Revenue> {
 
   fetchsellerPayments() async {
     String url = Platform.isAndroid
-        ? 'http://$ipAddress/twambale/api/get_payments_info.php'
-        : 'http://localhost/twambale/api/get_payments_info.php';
-
+        ? '$_postPhoneCatUrl/get_payments_info.php'
+        : '$_postCatUrl/get_payments_info.php';
     final Map<String, dynamic> requestData = {
       'action': 'getTotalPayments',
       'seller_id': sellerId,
@@ -284,7 +283,7 @@ class _RevenueState extends State<Revenue> {
   @override
   Widget build(BuildContext context) {
     final sellerProvider = Provider.of<SellerDataProvider>(context);
-    sellerProvider.fetchSellersData();
+    //sellerProvider.fetchSellersData();
     String? phoneNo = sellerProvider.sellers?.userPhone ?? "No phone Number";
     var height = MediaQuery.sizeOf(context).height;
 
